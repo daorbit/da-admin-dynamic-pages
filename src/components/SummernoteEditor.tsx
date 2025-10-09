@@ -54,8 +54,17 @@ const SummernoteEditor = forwardRef<SummernoteEditorRef, SummernoteEditorProps>(
             ['view', ['fullscreen', 'codeview', 'help']]
           ],
           callbacks: {
+            onInit: function() {
+              if (value) {
+                editorRef.current.summernote('code', value)
+              }
+            },
             onChange: function(contents: string) {
               console.log('Summernote onChange callback:', contents)
+              onChange(contents)
+            },
+            onBlur: function() {
+              const contents = editorRef.current.summernote('code')
               onChange(contents)
             }
           }

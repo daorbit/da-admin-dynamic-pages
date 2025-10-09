@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -25,7 +25,7 @@ import {
   Cancel as CancelIcon,
 } from '@mui/icons-material'
 import { pagesAPI } from '../services/api'
-import SummernoteEditor from '../components/SummernoteEditor'
+import SummernoteEditor, { SummernoteEditorRef } from '../components/SummernoteEditor'
 import type { CreatePageData } from '../types'
 
 // Validation schema
@@ -73,6 +73,8 @@ const PageForm: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [groupInput, setGroupInput] = useState('')
+
+  const editorRef = useRef<SummernoteEditorRef>(null)
 
   const {
     control,
@@ -143,15 +145,17 @@ const PageForm: React.FC = () => {
   }, [id, isEditing, reset])
 
   const onSubmit = async (data: CreatePageData) => {
-    console.log('Form data being submitted:', data)
+    const currentContent = editorRef.current?.getContent() || data.content
+    const finalData = { ...data, content: currentContent }
+    console.log('Form data being submitted:', finalData)
     try {
       setLoading(true)
       setError(null)
 
       if (isEditing && id) {
-        await pagesAPI.update(id, { ...data, _id: id })
+        await pagesAPI.update(id, { ...finalData, _id: id })
       } else {
-        await pagesAPI.create(data)
+        await pagesAPI.create(finalData)
       }
 
       navigate('/pages')
@@ -344,6 +348,7 @@ const PageForm: React.FC = () => {
                       Content
                     </Typography>
                     <SummernoteEditor
+                      ref={editorRef}
                       value={field.value}
                       onChange={field.onChange}
                       placeholder="Enter your page content here..."
