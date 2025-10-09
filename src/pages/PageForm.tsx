@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useForm, Controller } from 'react-hook-form'
-// import { yupResolver } from '@hookform/resolvers/yup'
+import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 import {
   Box,
@@ -25,7 +25,8 @@ import {
   Cancel as CancelIcon,
 } from '@mui/icons-material'
 import { pagesAPI } from '../services/api'
-import type { Page, CreatePageData } from '../types'
+import SummernoteEditor from '../components/SummernoteEditor'
+import type { CreatePageData } from '../types'
 
 // Validation schema
 const pageSchema = yup.object({
@@ -47,20 +48,22 @@ const pageSchema = yup.object({
     .url('Must be a valid URL'),
   groups: yup
     .array()
-    .of(yup.string())
+    .of(yup.string().required())
+    .defined()
+    .default([])
     .max(10, 'Cannot have more than 10 groups'),
   editorType: yup
     .string()
     .required('Editor type is required')
-    .oneOf(['markdown', 'wysiwyg'], 'Editor type must be markdown or wysiwyg'),
+    .oneOf(['markdown', 'wysiwyg'] as const, 'Editor type must be markdown or wysiwyg'),
   slug: yup
     .string()
+    .optional()
     .max(100, 'Slug cannot be more than 100 characters')
     .matches(/^[a-z0-9-]*$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
   content: yup
-    .string()
-    .required('Content is required'),
-})
+    .string(),
+}) satisfies yup.ObjectSchema<CreatePageData>
 
 const PageForm: React.FC = () => {
   const navigate = useNavigate()
@@ -79,16 +82,16 @@ const PageForm: React.FC = () => {
     watch,
     reset,
   } = useForm<CreatePageData>({
-    // resolver: yupResolver(pageSchema),
+    resolver: yupResolver(pageSchema),
     defaultValues: {
       title: '',
       description: '',
       imageUrl: '',
       thumbnailUrl: '',
       groups: [],
-      editorType: 'markdown',
+      editorType: 'markdown' as const,
       slug: '',
-      content: '',
+      content: undefined,
     },
   })
 
@@ -140,6 +143,7 @@ const PageForm: React.FC = () => {
   }, [id, isEditing, reset])
 
   const onSubmit = async (data: CreatePageData) => {
+    console.log('Form data being submitted:', data)
     try {
       setLoading(true)
       setError(null)
@@ -208,9 +212,10 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Title"
+                    label="Title *"
+                    placeholder="Enter page title"
                     error={!!errors.title}
-                    helperText={errors.title?.message}
+                    helperText={errors.title?.message || 'Required: Page title (max 200 characters)'}
                   />
                 )}
               />
@@ -242,9 +247,10 @@ const PageForm: React.FC = () => {
                     fullWidth
                     multiline
                     rows={3}
-                    label="Description"
+                    label="Description *"
+                    placeholder="Enter page description"
                     error={!!errors.description}
-                    helperText={errors.description?.message}
+                    helperText={errors.description?.message || 'Required: Page description (max 500 characters)'}
                   />
                 )}
               />
@@ -258,9 +264,10 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Image URL"
+                    label="Image URL *"
+                    placeholder="https://example.com/image.jpg"
                     error={!!errors.imageUrl}
-                    helperText={errors.imageUrl?.message}
+                    helperText={errors.imageUrl?.message || 'Required: Full-size image URL'}
                   />
                 )}
               />
@@ -274,9 +281,10 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Thumbnail URL"
+                    label="Thumbnail URL *"
+                    placeholder="https://example.com/thumbnail.jpg"
                     error={!!errors.thumbnailUrl}
-                    helperText={errors.thumbnailUrl?.message}
+                    helperText={errors.thumbnailUrl?.message || 'Required: Thumbnail image URL'}
                   />
                 )}
               />
@@ -288,17 +296,17 @@ const PageForm: React.FC = () => {
                 control={control}
                 render={({ field }) => (
                   <FormControl fullWidth error={!!errors.editorType}>
-                    <InputLabel>Editor Type</InputLabel>
+                    <InputLabel>Editor Type *</InputLabel>
                     <Select
                       {...field}
-                      label="Editor Type"
+                      label="Editor Type *"
                     >
                       <MenuItem value="markdown">Markdown</MenuItem>
                       <MenuItem value="wysiwyg">WYSIWYG</MenuItem>
                     </Select>
-                    {errors.editorType && (
-                      <FormHelperText>{errors.editorType.message}</FormHelperText>
-                    )}
+                    <FormHelperText>
+                      {errors.editorType?.message || 'Required: Content editor type'}
+                    </FormHelperText>
                   </FormControl>
                 )}
               />
@@ -331,15 +339,20 @@ const PageForm: React.FC = () => {
                 name="content"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    multiline
-                    rows={10}
-                    label="Content"
-                    error={!!errors.content}
-                    helperText={errors.content?.message}
-                  />
+                  <Box>
+                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                      Content
+                    </Typography>
+                    <SummernoteEditor
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Enter your page content here..."
+                      height={400}
+                    />
+                    {errors.content && (
+                      <FormHelperText error>{errors.content.message}</FormHelperText>
+                    )}
+                  </Box>
                 )}
               />
             </Grid>

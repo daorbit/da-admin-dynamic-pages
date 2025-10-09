@@ -20,7 +20,7 @@ export interface CreatePageData {
   groups: string[]
   editorType: 'markdown' | 'wysiwyg'
   slug?: string
-  content: string
+  content?: string
 }
 
 export interface UpdatePageData extends CreatePageData {

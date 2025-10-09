@@ -5,7 +5,6 @@ import {
   Typography,
   Button,
   Paper,
-  CircularProgress,
   Alert,
   Dialog,
   DialogTitle,
@@ -15,7 +14,6 @@ import {
   TextField,
   InputAdornment,
   Chip,
-  IconButton,
   Tooltip,
 } from '@mui/material'
 import {
@@ -29,7 +27,6 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
-  Visibility as VisibilityIcon,
 } from '@mui/icons-material'
 import { pagesAPI } from '../services/api'
 import type { Page } from '../types'
