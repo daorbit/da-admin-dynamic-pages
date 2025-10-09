@@ -155,13 +155,13 @@ const Login: React.FC = () => {
             </Button>
           </Box>
 
-          <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1, width: '100%' }}>
+          {/* <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1, width: '100%' }}>
             <Typography variant="body2" color="text.secondary" align="center">
               <strong>Demo Credentials:</strong><br />
               Username: admin<br />
               Password: admin123
             </Typography>
-          </Box>
+          </Box> */}
         </Paper>
       </Box>
     </Container>

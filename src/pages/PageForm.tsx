@@ -26,6 +26,7 @@ import {
 } from '@mui/icons-material'
 import { pagesAPI } from '../services/api'
 import SummernoteEditor, { SummernoteEditorRef } from '../components/SummernoteEditor'
+import QuillEditor, { QuillEditorRef } from '../components/QuillEditor'
 import type { CreatePageData } from '../types'
 
 // Validation schema
@@ -55,7 +56,7 @@ const pageSchema = yup.object({
   editorType: yup
     .string()
     .required('Editor type is required')
-    .oneOf(['markdown', 'wysiwyg'] as const, 'Editor type must be markdown or wysiwyg'),
+    .oneOf(['markdown', 'summernote', 'quill'] as const, 'Editor type must be markdown, summernote, or quill'),
   slug: yup
     .string()
     .optional()
@@ -74,7 +75,8 @@ const PageForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [groupInput, setGroupInput] = useState('')
 
-  const editorRef = useRef<SummernoteEditorRef>(null)
+  const summernoteRef = useRef<SummernoteEditorRef>(null)
+  const quillRef = useRef<QuillEditorRef>(null)
 
   const {
     control,
@@ -91,7 +93,7 @@ const PageForm: React.FC = () => {
       imageUrl: '',
       thumbnailUrl: '',
       groups: [],
-      editorType: 'markdown' as const,
+      editorType: 'summernote' as const,
       slug: '',
       content: undefined,
     },
@@ -99,6 +101,7 @@ const PageForm: React.FC = () => {
 
   const watchedTitle = watch('title')
   const watchedGroups = watch('groups')
+  const watchedEditorType = watch('editorType')
 
   // Auto-generate slug from title
   useEffect(() => {
@@ -145,7 +148,13 @@ const PageForm: React.FC = () => {
   }, [id, isEditing, reset])
 
   const onSubmit = async (data: CreatePageData) => {
-    const currentContent = editorRef.current?.getContent() || data.content
+    let currentContent = data.content
+    if (data.editorType === 'summernote' && summernoteRef.current) {
+      currentContent = summernoteRef.current.getContent()
+    } else if (data.editorType === 'quill' && quillRef.current) {
+      currentContent = quillRef.current.getContent()
+    }
+    // For markdown, use the form data directly
     const finalData = { ...data, content: currentContent }
     console.log('Form data being submitted:', finalData)
     try {
@@ -305,9 +314,9 @@ const PageForm: React.FC = () => {
                       {...field}
                       label="Editor Type *"
                     >
-                      <MenuItem value="markdown">Markdown</MenuItem>
-                      <MenuItem value="wysiwyg">WYSIWYG</MenuItem>
-                    </Select>
+                      <MenuItem value="summernote">Summernote Editor</MenuItem>
+                      <MenuItem value="quill">Quill Editor</MenuItem>
+                     </Select>
                     <FormHelperText>
                       {errors.editorType?.message || 'Required: Content editor type'}
                     </FormHelperText>
@@ -347,13 +356,32 @@ const PageForm: React.FC = () => {
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>
                       Content
                     </Typography>
-                    <SummernoteEditor
-                      ref={editorRef}
-                      value={field.value}
-                      onChange={field.onChange}
-                      placeholder="Enter your page content here..."
-                      height={400}
-                    />
+                    {watchedEditorType === 'summernote' ? (
+                      <SummernoteEditor
+                        ref={summernoteRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Enter your page content here..."
+                        height={400}
+                      />
+                    ) : watchedEditorType === 'quill' ? (
+                      <QuillEditor
+                        ref={quillRef}
+                        value={field.value}
+                        onChange={field.onChange}
+                        placeholder="Enter your page content here..."
+                        height={400}
+                      />
+                    ) : (
+                      <TextField
+                        {...field}
+                        multiline
+                        rows={15}
+                        fullWidth
+                        placeholder="Enter your page content here..."
+                        variant="outlined"
+                      />
+                    )}
                     {errors.content && (
                       <FormHelperText error>{errors.content.message}</FormHelperText>
                     )}

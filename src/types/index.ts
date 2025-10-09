@@ -5,7 +5,7 @@ export interface Page {
   imageUrl: string
   thumbnailUrl: string
   groups: string[]
-  editorType: 'markdown' | 'wysiwyg'
+  editorType: 'markdown' | 'summernote' | 'quill'
   slug: string
   content: string
   createdAt: string
@@ -18,7 +18,7 @@ export interface CreatePageData {
   imageUrl: string
   thumbnailUrl: string
   groups: string[]
-  editorType: 'markdown' | 'wysiwyg'
+  editorType: 'markdown' | 'summernote' | 'quill'
   slug?: string
   content?: string
 }
