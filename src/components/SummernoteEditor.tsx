@@ -3,6 +3,20 @@ import ReactSummernoteLite from 'react-summernote-lite'
 import 'react-summernote-lite/dist/font/summernote.ttf';
 import 'react-summernote-lite/dist/summernote-lite.min.css';
 
+// Import jQuery properly
+import $ from 'jquery'
+
+// Declare jQuery on window
+declare global {
+  interface Window {
+    $: typeof $;
+    jQuery: typeof $;
+  }
+}
+
+window.$ = $
+window.jQuery = $
+
 interface SummernoteEditorProps {
   value?: string
   onChange: (content: string) => void
