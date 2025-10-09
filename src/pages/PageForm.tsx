@@ -1,0 +1,374 @@
+import React, { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { useForm, Controller } from 'react-hook-form'
+// import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+import {
+  Box,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Chip,
+//   OutlinedInput,
+  CircularProgress,
+  Alert,
+  Grid,
+  FormHelperText,
+} from '@mui/material'
+import {
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+} from '@mui/icons-material'
+import { pagesAPI } from '../services/api'
+import type { Page, CreatePageData } from '../types'
+
+// Validation schema
+const pageSchema = yup.object({
+  title: yup
+    .string()
+    .required('Title is required')
+    .max(200, 'Title cannot be more than 200 characters'),
+  description: yup
+    .string()
+    .required('Description is required')
+    .max(500, 'Description cannot be more than 500 characters'),
+  imageUrl: yup
+    .string()
+    .required('Image URL is required')
+    .url('Must be a valid URL'),
+  thumbnailUrl: yup
+    .string()
+    .required('Thumbnail URL is required')
+    .url('Must be a valid URL'),
+  groups: yup
+    .array()
+    .of(yup.string())
+    .max(10, 'Cannot have more than 10 groups'),
+  editorType: yup
+    .string()
+    .required('Editor type is required')
+    .oneOf(['markdown', 'wysiwyg'], 'Editor type must be markdown or wysiwyg'),
+  slug: yup
+    .string()
+    .max(100, 'Slug cannot be more than 100 characters')
+    .matches(/^[a-z0-9-]*$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
+  content: yup
+    .string()
+    .required('Content is required'),
+})
+
+const PageForm: React.FC = () => {
+  const navigate = useNavigate()
+  const { id } = useParams<{ id: string }>()
+  const isEditing = Boolean(id)
+  
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [groupInput, setGroupInput] = useState('')
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    setValue,
+    watch,
+    reset,
+  } = useForm<CreatePageData>({
+    // resolver: yupResolver(pageSchema),
+    defaultValues: {
+      title: '',
+      description: '',
+      imageUrl: '',
+      thumbnailUrl: '',
+      groups: [],
+      editorType: 'markdown',
+      slug: '',
+      content: '',
+    },
+  })
+
+  const watchedTitle = watch('title')
+  const watchedGroups = watch('groups')
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (watchedTitle && !isEditing) {
+      const slug = watchedTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim()
+      setValue('slug', slug)
+    }
+  }, [watchedTitle, setValue, isEditing])
+
+  // Load page data for editing
+  useEffect(() => {
+    if (isEditing && id) {
+      const loadPage = async () => {
+        try {
+          setLoading(true)
+          const response = await pagesAPI.getById(id)
+          const page = response.data
+          
+          reset({
+            title: page.title,
+            description: page.description,
+            imageUrl: page.imageUrl,
+            thumbnailUrl: page.thumbnailUrl,
+            groups: page.groups,
+            editorType: page.editorType,
+            slug: page.slug,
+            content: page.content,
+          })
+        } catch (err) {
+          console.error('Error loading page:', err)
+          setError('Failed to load page data')
+        } finally {
+          setLoading(false)
+        }
+      }
+      
+      loadPage()
+    }
+  }, [id, isEditing, reset])
+
+  const onSubmit = async (data: CreatePageData) => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      if (isEditing && id) {
+        await pagesAPI.update(id, { ...data, _id: id })
+      } else {
+        await pagesAPI.create(data)
+      }
+
+      navigate('/pages')
+    } catch (err) {
+      console.error('Error saving page:', err)
+      setError(isEditing ? 'Failed to update page' : 'Failed to create page')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleAddGroup = () => {
+    if (groupInput.trim() && !watchedGroups.includes(groupInput.trim())) {
+      setValue('groups', [...watchedGroups, groupInput.trim()])
+      setGroupInput('')
+    }
+  }
+
+  const handleRemoveGroup = (groupToRemove: string) => {
+    setValue('groups', watchedGroups.filter(group => group !== groupToRemove))
+  }
+
+  const handleGroupInputKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      handleAddGroup()
+    }
+  }
+
+  if (loading && isEditing) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <CircularProgress />
+      </Box>
+    )
+  }
+
+  return (
+    <Box>
+      <Typography variant="h4" component="h1" gutterBottom>
+        {isEditing ? 'Edit Page' : 'Create New Page'}
+      </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <Paper sx={{ p: 3 }}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="title"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Title"
+                    error={!!errors.title}
+                    helperText={errors.title?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="slug"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Slug"
+                    error={!!errors.slug}
+                    helperText={errors.slug?.message || 'URL-friendly identifier'}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Controller
+                name="description"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    multiline
+                    rows={3}
+                    label="Description"
+                    error={!!errors.description}
+                    helperText={errors.description?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="imageUrl"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Image URL"
+                    error={!!errors.imageUrl}
+                    helperText={errors.imageUrl?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="thumbnailUrl"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    label="Thumbnail URL"
+                    error={!!errors.thumbnailUrl}
+                    helperText={errors.thumbnailUrl?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="editorType"
+                control={control}
+                render={({ field }) => (
+                  <FormControl fullWidth error={!!errors.editorType}>
+                    <InputLabel>Editor Type</InputLabel>
+                    <Select
+                      {...field}
+                      label="Editor Type"
+                    >
+                      <MenuItem value="markdown">Markdown</MenuItem>
+                      <MenuItem value="wysiwyg">WYSIWYG</MenuItem>
+                    </Select>
+                    {errors.editorType && (
+                      <FormHelperText>{errors.editorType.message}</FormHelperText>
+                    )}
+                  </FormControl>
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Box>
+                <TextField
+                  fullWidth
+                  label="Add Group"
+                  value={groupInput}
+                  onChange={(e) => setGroupInput(e.target.value)}
+                  onKeyPress={handleGroupInputKeyPress}
+                  helperText="Press Enter to add group"
+                />
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                  {watchedGroups.map((group, index) => (
+                    <Chip
+                      key={index}
+                      label={group}
+                      onDelete={() => handleRemoveGroup(group)}
+                    />
+                  ))}
+                </Box>
+              </Box>
+            </Grid>
+
+            <Grid item xs={12}>
+              <Controller
+                name="content"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    multiline
+                    rows={10}
+                    label="Content"
+                    error={!!errors.content}
+                    helperText={errors.content?.message}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<CancelIcon />}
+                  onClick={() => navigate('/pages')}
+                  disabled={loading}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  startIcon={<SaveIcon />}
+                  disabled={loading}
+                >
+                  {loading ? 'Saving...' : (isEditing ? 'Update Page' : 'Create Page')}
+                </Button>
+              </Box>
+            </Grid>
+          </Grid>
+        </form>
+      </Paper>
+    </Box>
+  )
+}
+
+export default PageForm

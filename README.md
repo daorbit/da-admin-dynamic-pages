@@ -45,10 +45,18 @@ src/
 
 ## 🔧 Configuration
 
-- **Vite Config**: `vite.config.js`
-- **Proxy**: API requests are proxied to `http://localhost:5000`
+- **Vite Config**: `vite.config.ts`
+- **Backend URL**: API requests are sent to `https://da-pages-be.vercel.app/api`
 - **Port**: Development server runs on port `3000`
+
+## 🔐 Authentication
+
+The admin panel includes basic authentication with hardcoded credentials:
+- **Username**: `admin`
+- **Password**: `admin123`
+
+Authentication state is persisted in localStorage.
 
 ## 🌐 Backend Integration
 
-The frontend is configured to work with the Express backend running on port 5000. API requests are automatically proxied from `/api/*` to the backend server.
+The frontend is configured to work with the Express backend deployed on Vercel at `https://da-pages-be.vercel.app/api`.
