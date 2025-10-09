@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   Box,
@@ -27,48 +27,35 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Search as SearchIcon,
+  Visibility as VisibilityIcon,
 } from '@mui/icons-material'
-import { pagesAPI } from '../services/api'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { fetchPages, deletePage, setSearchTerm, setPagination } from '../store/slices/pagesSlice'
 import type { Page } from '../types'
 
 const PageList: React.FC = () => {
   const navigate = useNavigate()
-  const [pages, setPages] = useState<Page[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [pageToDelete, setPageToDelete] = useState<Page | null>(null)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [paginationModel, setPaginationModel] = useState({
-    page: 0,
-    pageSize: 10,
-  })
-  const [totalRows, setTotalRows] = useState(0)
+  const dispatch = useAppDispatch()
+  const { items: pages, loading, error, pagination, searchTerm, lastFetched } = useAppSelector(
+    (state) => state.pages
+  )
 
-  const fetchPages = async () => {
-    try {
-      setLoading(true)
-      setError(null)
-      
-      const response = await pagesAPI.getAll({
-        page: paginationModel.page + 1, // API uses 1-based pagination
-        limit: paginationModel.pageSize,
-        search: searchTerm || undefined,
-      })
-      
-      setPages(response.data.pages)
-      setTotalRows(response.data.pagination.totalItems)
-    } catch (err) {
-      console.error('Error fetching pages:', err)
-      setError('Failed to load pages')
-    } finally {
-      setLoading(false)
-    }
-  }
+  const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false)
+  const [pageToDelete, setPageToDelete] = React.useState<Page | null>(null)
 
   useEffect(() => {
-    fetchPages()
-  }, [paginationModel, searchTerm])
+    // Only fetch if we haven't fetched recently or if pagination/search changed
+    const CACHE_DURATION = 2 * 60 * 1000 // 2 minutes for pages list
+    const shouldFetch = !lastFetched || (Date.now() - lastFetched) > CACHE_DURATION
+
+    if (shouldFetch || pagination.page !== 1 || pagination.pageSize !== 10 || searchTerm !== '') {
+      dispatch(fetchPages({
+        page: pagination.page,
+        pageSize: pagination.pageSize,
+        search: searchTerm
+      }))
+    }
+  }, [dispatch, pagination.page, pagination.pageSize, searchTerm, lastFetched])
 
   const handleEdit = (id: string) => {
     navigate(`/pages/edit/${id}`)
@@ -83,18 +70,28 @@ const PageList: React.FC = () => {
     if (!pageToDelete) return
 
     try {
-      await pagesAPI.delete(pageToDelete._id)
+      await dispatch(deletePage(pageToDelete._id))
       setDeleteDialogOpen(false)
       setPageToDelete(null)
-      fetchPages() // Refresh the list
     } catch (error) {
       console.error('Error deleting page:', error)
     }
   }
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(event.target.value)
-    setPaginationModel(prev => ({ ...prev, page: 0 })) // Reset to first page
+    dispatch(setSearchTerm(event.target.value))
+  }
+
+  const handlePaginationChange = (newPaginationModel: { page: number; pageSize: number }) => {
+    dispatch(setPagination({
+      page: newPaginationModel.page + 1, // Convert to 1-based
+      pageSize: newPaginationModel.pageSize
+    }))
+  }
+
+  const handlePreview = (page: Page) => {
+    // Navigate to preview page
+    navigate(`/pages/preview/${page.slug}`)
   }
 
   const columns: GridColDef[] = [
@@ -167,6 +164,16 @@ const PageList: React.FC = () => {
       width: 120,
       getActions: (params: GridRowParams<Page>) => [
         <GridActionsCellItem
+          key="preview"
+          icon={
+            <Tooltip title="Preview">
+              <VisibilityIcon />
+            </Tooltip>
+          }
+          label="Preview"
+          onClick={() => handlePreview(params.row)}
+        />,
+        <GridActionsCellItem
           key="edit"
           icon={
             <Tooltip title="Edit">
@@ -232,10 +239,13 @@ const PageList: React.FC = () => {
           rows={pages}
           columns={columns}
           getRowId={(row) => row._id}
-          paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel}
+          paginationModel={{
+            page: pagination.page - 1, // Convert to 0-based for DataGrid
+            pageSize: pagination.pageSize
+          }}
+          onPaginationModelChange={handlePaginationChange}
           pageSizeOptions={[5, 10, 25]}
-          rowCount={totalRows}
+          rowCount={pagination.totalItems}
           paginationMode="server"
           loading={loading}
           disableRowSelectionOnClick

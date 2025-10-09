@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import {
   Box,
   Typography,
@@ -15,41 +15,24 @@ import {
   TrendingUp as TrendingUpIcon,
   Schedule as ScheduleIcon,
 } from '@mui/icons-material'
-import { pagesAPI, healthCheck } from '../services/api'
-import type { Page, HealthResponse } from '../types'
+import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { fetchDashboardData } from '../store/slices/dashboardSlice'
 
 const Dashboard: React.FC = () => {
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [recentPages, setRecentPages] = useState<Page[]>([])
-  const [totalPages, setTotalPages] = useState(0)
-  const [healthStatus, setHealthStatus] = useState<HealthResponse | null>(null)
+  const dispatch = useAppDispatch()
+  const { recentPages, totalPages, healthStatus, loading, error, lastFetched } = useAppSelector(
+    (state) => state.dashboard
+  )
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true)
-        setError(null)
+    // Only fetch if we haven't fetched in the last 5 minutes (300000 ms)
+    const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
+    const shouldFetch = !lastFetched || (Date.now() - lastFetched) > CACHE_DURATION
 
-        // Fetch recent pages and health status in parallel
-        const [pagesResponse, health] = await Promise.all([
-          pagesAPI.getAll({ limit: 5, page: 1 }),
-          healthCheck()
-        ])
-
-        setRecentPages(pagesResponse.data.pages)
-        setTotalPages(pagesResponse.data.pagination.totalItems)
-        setHealthStatus(health)
-      } catch (err) {
-        console.error('Error fetching dashboard data:', err)
-        setError('Failed to load dashboard data')
-      } finally {
-        setLoading(false)
-      }
+    if (shouldFetch) {
+      dispatch(fetchDashboardData())
     }
-
-    fetchDashboardData()
-  }, [])
+  }, [dispatch, lastFetched])
 
   if (loading) {
     return (

@@ -6,6 +6,7 @@ import Layout from './components/Layout'
 import Dashboard from './pages/Dashboard'
 import PageList from './pages/PageList'
 import PageForm from './pages/PageForm'
+import PagePreview from './pages/PagePreview'
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
                 <Route path="/pages" element={<PageList />} />
                 <Route path="/pages/new" element={<PageForm />} />
                 <Route path="/pages/edit/:id" element={<PageForm />} />
+                <Route path="/pages/preview/:slug" element={<PagePreview />} />
               </Routes>
             </Layout>
           </ProtectedRoute>
