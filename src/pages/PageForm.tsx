@@ -83,7 +83,7 @@ const PageForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [groupInput, setGroupInput] = useState("");
-  const [selectedAI, setSelectedAI] = useState<AIProvider>("gemini");
+  const [selectedAI, setSelectedAI] = useState<AIProvider>("perplexity");
 
   const { generateContent, generating } = useAIGeneration({
     onContentGenerated: (content: string) => {
@@ -577,7 +577,6 @@ const PageForm: React.FC = () => {
                             <Button
                               variant="contained"
                               onClick={handleGenerateContent}
-                              disabled={generating}
                               size="large"
                               sx={{
                                 minWidth: 150,
@@ -599,7 +598,7 @@ const PageForm: React.FC = () => {
                             value={field.value}
                             onChange={field.onChange}
                             placeholder="Enter your page content here..."
-                            height={400}
+                            height={800}
                           />
                         ) : watchedEditorType === "quill" ? (
                           <QuillEditor
@@ -607,7 +606,7 @@ const PageForm: React.FC = () => {
                             value={field.value}
                             onChange={field.onChange}
                             placeholder="Enter your page content here..."
-                            height={400}
+                            height={700}
                           />
                         ) : (
                           <TextField
