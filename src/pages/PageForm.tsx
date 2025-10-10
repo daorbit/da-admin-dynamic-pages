@@ -194,13 +194,13 @@ const PageForm: React.FC = () => {
     }
   }
 
-  if (loading && isEditing) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-        <CircularProgress />
-      </Box>
-    )
-  }
+  // if (loading && isEditing) {
+  //   return (
+  //     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+  //       <CircularProgress />
+  //     </Box>
+  //   )
+  // }
 
   return (
     <Box>
@@ -404,9 +404,8 @@ const PageForm: React.FC = () => {
                   type="submit"
                   variant="contained"
                   startIcon={<SaveIcon />}
-                  disabled={loading}
                 >
-                  {loading ? 'Saving...' : (isEditing ? 'Update Page' : 'Create Page')}
+                  {loading ? <CircularProgress size={20} /> : (isEditing ? 'Update Page' : 'Create Page')}
                 </Button>
               </Box>
             </Grid>

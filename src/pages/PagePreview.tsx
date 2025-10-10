@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Box,
-  Paper,
   CircularProgress,
   Alert,
   Button,
@@ -88,9 +87,7 @@ const PagePreview: React.FC = () => {
         <CardContent>
           {page.content && (
             <Box sx={{ mt: 3 }}>
-              <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
-                <div dangerouslySetInnerHTML={{ __html: page.content }} />
-              </Paper>
+              <div dangerouslySetInnerHTML={{ __html: page.content }} />
             </Box>
           )}
         </CardContent>
