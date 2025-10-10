@@ -209,7 +209,7 @@ const PageForm: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom>
+      <Typography variant="h6" gutterBottom>
         {isEditing ? "Edit Page" : "Create New Page"}
       </Typography>
 
@@ -223,7 +223,7 @@ const PageForm: React.FC = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Title *
               </Typography>
               <Controller
@@ -233,7 +233,6 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    placeholder="Enter page title"
                     error={!!errors.title}
                     helperText={errors.title?.message}
                     sx={{
@@ -247,7 +246,7 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Slug
               </Typography>
               <Controller
@@ -257,7 +256,6 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    placeholder="Enter slug"
                     error={!!errors.slug}
                     helperText={errors.slug?.message}
                     sx={{
@@ -271,7 +269,7 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Description *
               </Typography>
               <Controller
@@ -283,7 +281,6 @@ const PageForm: React.FC = () => {
                     fullWidth
                     multiline
                     rows={3}
-                    placeholder="Enter page description"
                     error={!!errors.description}
                     helperText={errors.description?.message}
                     sx={{
@@ -297,7 +294,7 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Image URL *
               </Typography>
               <Controller
@@ -307,7 +304,6 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    placeholder="https://example.com/image.jpg"
                     error={!!errors.imageUrl}
                     helperText={errors.imageUrl?.message}
                     sx={{
@@ -321,7 +317,7 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Thumbnail URL *
               </Typography>
               <Controller
@@ -331,7 +327,6 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    placeholder="https://example.com/thumbnail.jpg"
                     error={!!errors.thumbnailUrl}
                     helperText={errors.thumbnailUrl?.message}
                     sx={{
@@ -345,7 +340,7 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Editor Type *
               </Typography>
               <Controller
@@ -371,13 +366,12 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
-              <Typography variant="body1" sx={{ mb: 1 }}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Groups
               </Typography>
               <Box>
                 <TextField
                   fullWidth
-                  placeholder="Add Group"
                   value={groupInput}
                   onChange={(e) => setGroupInput(e.target.value)}
                   onKeyPress={handleGroupInputKeyPress}
@@ -406,7 +400,10 @@ const PageForm: React.FC = () => {
                 control={control}
                 render={({ field }) => (
                   <Box>
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ mb: 1, fontSize: "13px" }}
+                    >
                       Content
                     </Typography>
                     {watchedEditorType === "summernote" ? (
