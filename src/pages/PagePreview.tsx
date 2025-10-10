@@ -63,6 +63,11 @@ const PagePreview: React.FC = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate("/pages")}
           variant="outlined"
+          sx={{
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 500,
+          }}
         >
           Back to Pages
         </Button>
@@ -77,7 +82,12 @@ const PagePreview: React.FC = () => {
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate("/pages")}
           variant="outlined"
-          sx={{ mb: 2 }}
+          sx={{ 
+            mb: 2,
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 500,
+          }}
         >
           Back to Pages
         </Button>

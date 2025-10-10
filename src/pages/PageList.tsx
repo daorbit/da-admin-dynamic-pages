@@ -146,13 +146,13 @@ const PageList: React.FC = () => {
       field: "title",
       headerName: "Title",
       flex: 1,
-      minWidth: 200,
+      minWidth: 120,
     },
     {
       field: "description",
       headerName: "Description",
       flex: 1,
-      minWidth: 250,
+      minWidth: 120,
       renderCell: (params) => (
         <Typography
           variant="body2"
@@ -264,6 +264,13 @@ const PageList: React.FC = () => {
           variant="contained"
           startIcon={<AddIcon size={20} />}
           onClick={() => navigate('/pages/new')}
+          sx={{
+            borderRadius: "8px",
+            textTransform: "none",
+            fontWeight: 500,
+            px: 3,
+            py: 1,
+          }}
         >
           Create New Page
         </Button>
@@ -342,6 +349,12 @@ const PageList: React.FC = () => {
           sx={{
             "& .MuiDataGrid-cell": {
               border: "none",
+              "&:focus": {
+                outline: "none",
+              },
+              "&:focus-within": {
+                outline: "none",
+              },
             },
             "& .MuiDataGrid-columnHeaders": {
               backgroundColor: "grey.50",
@@ -349,6 +362,12 @@ const PageList: React.FC = () => {
             },
             "& .MuiDataGrid-row": {
               borderBottom: "1px solid #e0e0e0",
+            },
+            "& .MuiDataGrid-cell:focus": {
+              outline: "none",
+            },
+            "& .MuiDataGrid-cell:focus-within": {
+              outline: "none",
             },
           }}
         />
@@ -367,8 +386,25 @@ const PageList: React.FC = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
+          <Button 
+            onClick={() => setDeleteDialogOpen(false)}
+            sx={{
+              borderRadius: "8px",
+              textTransform: "none",
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={confirmDelete} 
+            color="error" 
+            variant="contained"
+            sx={{
+              borderRadius: "8px",
+              textTransform: "none",
+              fontWeight: 500,
+            }}
+          >
             Delete
           </Button>
         </DialogActions>

@@ -147,7 +147,14 @@ const Login: React.FC = () => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              sx={{ 
+                mt: 3, 
+                mb: 2,
+                borderRadius: "8px",
+                textTransform: "none",
+                fontWeight: 500,
+                py: 1.5,
+              }}
               disabled={loading}
               startIcon={<LoginIcon />}
             >

@@ -453,10 +453,25 @@ const PageForm: React.FC = () => {
                   variant="outlined"
                   onClick={() => navigate("/pages")}
                   disabled={loading}
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    px: 3,
+                  }}
                 >
                   Cancel
                 </Button>
-                <Button type="submit" variant="contained">
+                <Button 
+                  type="submit" 
+                  variant="contained"
+                  sx={{
+                    borderRadius: "8px",
+                    textTransform: "none",
+                    fontWeight: 500,
+                    px: 3,
+                  }}
+                >
                   {loading ? <CircularProgress size={20} /> : ""}
                   Save
                 </Button>
