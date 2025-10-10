@@ -224,13 +224,18 @@ const PageForm: React.FC = () => {
     generateContent(selectedAI, title, description, aiReferences);
   };
 
-  // if (loading && isEditing) {
-  //   return (
-  //     <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
-  //       <CircularProgress />
-  //     </Box>
-  //   )
-  // }
+  if (loading && isEditing) {
+    return (
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100%"
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box>

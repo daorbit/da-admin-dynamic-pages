@@ -230,24 +230,6 @@ const PageList: React.FC = () => {
       ),
     },
     {
-      field: "audioUrl",
-      headerName: "Audio URL",
-      flex: 1,
-      minWidth: 120,
-      renderCell: (params) => (
-        <Typography
-          variant="body2"
-          sx={{
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {params.value || "N/A"}
-        </Typography>
-      ),
-    },
-    {
       field: "groups",
       headerName: "Groups",
       width: 200,
