@@ -143,7 +143,7 @@ const PageList: React.FC = () => {
         <Chip 
           label={params.value} 
           size="small"
-          color={params.value === 'markdown' ? 'primary' : 'secondary'}
+          color={params.value === 'summernote' ? 'primary' : 'secondary'}
         />
       ),
     },

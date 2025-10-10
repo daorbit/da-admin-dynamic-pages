@@ -51,6 +51,14 @@ export const deletePage = createAsyncThunk(
   }
 )
 
+export const createPage = createAsyncThunk(
+  'pages/createPage',
+  async (pageData: any) => {
+    const response = await pagesAPI.create(pageData)
+    return response.data
+  }
+)
+
 const pagesSlice = createSlice({
   name: 'pages',
   initialState,
@@ -91,6 +99,10 @@ const pagesSlice = createSlice({
       .addCase(deletePage.fulfilled, (state, action) => {
         state.items = state.items.filter(page => page._id !== action.payload)
         state.pagination.totalItems -= 1
+      })
+      .addCase(createPage.fulfilled, (state) => {
+        // Invalidate cache so the list refetches data
+        state.lastFetched = null
       })
   },
 })

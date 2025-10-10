@@ -27,6 +27,8 @@ import {
 import { pagesAPI } from '../services/api'
 import SummernoteEditor, { SummernoteEditorRef } from '../components/SummernoteEditor'
 import QuillEditor, { QuillEditorRef } from '../components/QuillEditor'
+import { useAppDispatch } from '../store/hooks'
+import { createPage } from '../store/slices/pagesSlice'
 import type { CreatePageData } from '../types'
 
 // Validation schema
@@ -56,7 +58,7 @@ const pageSchema = yup.object({
   editorType: yup
     .string()
     .required('Editor type is required')
-    .oneOf(['markdown', 'summernote', 'quill'] as const, 'Editor type must be markdown, summernote, or quill'),
+    .oneOf(['summernote', 'quill'] as const, 'Editor type must be markdown, summernote, or quill'),
   slug: yup
     .string()
     .optional()
@@ -70,6 +72,7 @@ const PageForm: React.FC = () => {
   const navigate = useNavigate()
   const { id } = useParams<{ id: string }>()
   const isEditing = Boolean(id)
+  const dispatch = useAppDispatch()
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -164,7 +167,7 @@ const PageForm: React.FC = () => {
       if (isEditing && id) {
         await pagesAPI.update(id, { ...finalData, _id: id })
       } else {
-        await pagesAPI.create(finalData)
+        await dispatch(createPage(finalData))
       }
 
       navigate('/pages')
