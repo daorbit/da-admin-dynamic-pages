@@ -24,6 +24,7 @@ import SummernoteEditor, {
 import QuillEditor, { QuillEditorRef } from "../components/QuillEditor";
 import { useAppDispatch } from "../store/hooks";
 import { createPage } from "../store/slices/pagesSlice";
+import { useAIGeneration, AIProvider } from "../hooks/useAIGeneration";
 import type { CreatePageData } from "../types";
 
 const pageSchema = yup.object({
@@ -76,6 +77,16 @@ const PageForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [groupInput, setGroupInput] = useState("");
+  const [selectedAI, setSelectedAI] = useState<AIProvider>('gemini');
+
+  const { generateContent, generating } = useAIGeneration({
+    onContentGenerated: (content: string) => {
+      setValue('content', content);
+    },
+    onError: (errorMessage: string) => {
+      setError(errorMessage);
+    },
+  });
 
   const summernoteRef = useRef<SummernoteEditorRef>(null);
   const quillRef = useRef<QuillEditorRef>(null);
@@ -197,6 +208,12 @@ const PageForm: React.FC = () => {
       event.preventDefault();
       handleAddGroup();
     }
+  };
+
+  const handleGenerateContent = () => {
+    const title = watch('title');
+    const description = watch('description');
+    generateContent(selectedAI, title, description);
   };
 
   // if (loading && isEditing) {
@@ -400,12 +417,36 @@ const PageForm: React.FC = () => {
                 control={control}
                 render={({ field }) => (
                   <Box>
-                    <Typography
-                      variant="subtitle1"
-                      sx={{ mb: 1, fontSize: "13px" }}
-                    >
-                      Content
-                    </Typography>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
+                      <Typography
+                        variant="subtitle1"
+                        sx={{ fontSize: "13px" }}
+                      >
+                        Content
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                        <FormControl sx={{ minWidth: 200 }}>
+                          <Select
+                            value={selectedAI}
+                            onChange={(e) => setSelectedAI(e.target.value as AIProvider)}
+                            displayEmpty
+                            size="small"
+                          >
+                            <MenuItem value="gemini">Gemini</MenuItem>
+                            <MenuItem value="perplexity">Perplexity</MenuItem>
+                          </Select>
+                        </FormControl>
+                        <Button
+                          variant="contained"
+                          onClick={handleGenerateContent}
+                          disabled={generating}
+                          size="large"
+                          sx={{ minWidth: 150 ,borderRadius: "8px" ,boxShadow:"none"}}
+                        >
+                          {generating ? <CircularProgress size={20} /> : 'Generate with AI'}
+                        </Button>
+                      </Box>
+                    </Box>
                     {watchedEditorType === "summernote" ? (
                       <SummernoteEditor
                         ref={summernoteRef}
