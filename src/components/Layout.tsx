@@ -58,7 +58,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isCollapsed = !isMobile;
 
   const drawer = (
-    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100%",
+        bgcolor: "#4440cc",
+      }}
+    >
       <Box>
         <Box
           sx={{
@@ -68,7 +75,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             p: 2,
           }}
         >
-          <Home color="#1976d2" />
+          <Home color="#fff" />
           {!isCollapsed && (
             <Typography variant="h6" noWrap component="div" sx={{ ml: 1 }}>
               DA CMS
@@ -93,7 +100,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }}
                 >
                   <ListItemIcon
-                    sx={{ minWidth: "auto", mr: isCollapsed ? 0 : 2 }}
+                    sx={{
+                      minWidth: "auto",
+                      mr: isCollapsed ? 0 : 2,
+                      color: "#fff",
+                    }}
                   >
                     <Icon />
                   </ListItemIcon>
@@ -119,7 +130,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 px: 1,
               }}
             >
-              <ListItemIcon sx={{ minWidth: "auto", mr: isCollapsed ? 0 : 2 }}>
+              <ListItemIcon
+                sx={{
+                  minWidth: "auto",
+                  mr: isCollapsed ? 0 : 2,
+                  color: "#fff",
+                }}
+              >
                 <LogOut />
               </ListItemIcon>
               {!isCollapsed && <ListItemText primary="Logout" />}
