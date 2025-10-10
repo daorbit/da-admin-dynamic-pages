@@ -44,6 +44,10 @@ const pageSchema = yup.object({
     .string()
     .required("Thumbnail URL is required")
     .url("Must be a valid URL"),
+  audioUrl: yup
+    .string()
+    .optional()
+    .url("Must be a valid URL"),
   groups: yup
     .array()
     .of(yup.string().required())
@@ -346,6 +350,29 @@ const PageForm: React.FC = () => {
                     fullWidth
                     error={!!errors.thumbnailUrl}
                     helperText={errors.thumbnailUrl?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
+                Audio URL
+              </Typography>
+              <Controller
+                name="audioUrl"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    error={!!errors.audioUrl}
+                    helperText={errors.audioUrl?.message}
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "8px",
