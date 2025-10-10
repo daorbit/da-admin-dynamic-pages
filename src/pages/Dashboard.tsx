@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect } from "react";
 import {
   Box,
   Typography,
@@ -7,37 +7,56 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  Paper,
-  Chip,
-} from '@mui/material'
+} from "@mui/material";
 import {
-  Article as ArticleIcon,
-} from '@mui/icons-material'
-import { useAppDispatch, useAppSelector } from '../store/hooks'
-import { fetchDashboardData } from '../store/slices/dashboardSlice'
+  FileText,
+  Users,
+  Activity,
+  Eye,
+  TrendingUp,
+  DollarSign,
+} from "lucide-react";
+import Charts from "../components/Charts";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchDashboardData } from "../store/slices/dashboardSlice";
 
 const Dashboard: React.FC = () => {
-  const dispatch = useAppDispatch()
-  const { recentPages, totalPages, loading, error, lastFetched } = useAppSelector(
+  // Hard coded stats
+  const stats = [
+    { title: "Total Pages", value: 156, icon: FileText, color: "#2196f3" },
+    { title: "Total Users", value: 1250, icon: Users, color: "#4caf50" },
+    { title: "Active Pages", value: 45, icon: Activity, color: "#ff9800" },
+    { title: "Views Today", value: 3200, icon: Eye, color: "#9c27b0" },
+    { title: "Growth Rate", value: "+12%", icon: TrendingUp, color: "#00bcd4" },
+    { title: "Revenue", value: "$24,500", icon: DollarSign, color: "#8bc34a" },
+  ];
+
+  const dispatch = useAppDispatch();
+  const { loading, error, lastFetched } = useAppSelector(
     (state) => state.dashboard
-  )
+  );
 
   useEffect(() => {
-    // Only fetch if we haven't fetched in the last 5 minutes (300000 ms)
-    const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes
-    const shouldFetch = !lastFetched || (Date.now() - lastFetched) > CACHE_DURATION
+    const CACHE_DURATION = 5 * 60 * 1000;
+    const shouldFetch =
+      !lastFetched || Date.now() - lastFetched > CACHE_DURATION;
 
     if (shouldFetch) {
-      dispatch(fetchDashboardData())
+      dispatch(fetchDashboardData());
     }
-  }, [dispatch, lastFetched])
+  }, [dispatch, lastFetched]);
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
-    )
+    );
   }
 
   if (error) {
@@ -45,77 +64,43 @@ const Dashboard: React.FC = () => {
       <Alert severity="error" sx={{ mb: 2 }}>
         {error}
       </Alert>
-    )
+    );
   }
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h6" component="h1" gutterBottom sx={{ mb: 2 }}>
         Dashboard
       </Typography>
 
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        {/* Total Pages Card */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Card>
-            <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-              <ArticleIcon color="primary" sx={{ fontSize: 40, mr: 2 }} />
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  Total Pages
-                </Typography>
-                <Typography variant="h4">
-                  {totalPages}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
+      <Grid container spacing={4} sx={{ mb: 6, mt: 2 }}>
+        {stats.map((stat, index) => (
+          <Grid item xs={12} sm={6} md={4} key={index}>
+            <Card
+              sx={{
+                color: "#777777",
+                borderRadius: 2,
+                border: `2px solid ${stat.color}`,
+                boxShadow: "none",
+              }}
+            >
+              <CardContent sx={{ display: "flex", alignItems: "center", p: 3 }}>
+                <stat.icon size={40} />
+                <Box sx={{ ml: 3 }}>
+                  <Typography variant="h6" gutterBottom>
+                    {stat.title}
+                  </Typography>
+                  <Typography variant="h4">{stat.value}</Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
+        ))}
       </Grid>
 
-      {/* Recent Pages */}
-      <Paper sx={{ p: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Recent Pages
-        </Typography>
-        
-        {recentPages.length === 0 ? (
-          <Typography color="textSecondary">
-            No pages found. Create your first page!
-          </Typography>
-        ) : (
-          <Grid container spacing={2}>
-            {recentPages.map((page) => (
-              <Grid item xs={12} sm={6} md={4} key={page._id}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="h6" component="h3" gutterBottom>
-                      {page.title}
-                    </Typography>
-                    <Typography color="textSecondary" variant="body2" paragraph>
-                      {page.description.substring(0, 100)}
-                      {page.description.length > 100 && '...'}
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 1 }}>
-                      {page.groups.slice(0, 3).map((group, index) => (
-                        <Chip key={index} label={group} size="small" />
-                      ))}
-                      {page.groups.length > 3 && (
-                        <Chip label={`+${page.groups.length - 3} more`} size="small" variant="outlined" />
-                      )}
-                    </Box>
-                    <Typography variant="caption" color="textSecondary">
-                      Created: {new Date(page.createdAt).toLocaleDateString()}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        )}
-      </Paper>
+      <Charts />
     </Box>
-  )
-}
+  );
+};
 
-export default Dashboard
+export default Dashboard;
