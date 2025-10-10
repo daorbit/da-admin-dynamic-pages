@@ -56,6 +56,9 @@ const PageList: React.FC = () => {
   const [titleFilter, setTitleFilter] = React.useState("");
   const [selectedGroups, setSelectedGroups] = React.useState<string[]>([]);
 
+  const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
+  const [selectedImage, setSelectedImage] = React.useState<string>('');
+
   // Get unique groups for filter dropdown
   const availableGroups = useMemo(() => {
     const groups = new Set<string>();
@@ -164,6 +167,66 @@ const PageList: React.FC = () => {
         >
           {params.value}
         </Typography>
+      ),
+    },
+    {
+      field: "imageUrl",
+      headerName: "Image",
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+          <img src={params.value} alt="Page Image" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              opacity: 0,
+              transition: 'opacity 0.3s',
+              '&:hover': { opacity: 1 },
+              cursor: 'pointer',
+            }}
+            onClick={() => { setSelectedImage(params.value); setImageDialogOpen(true); }}
+          >
+            <VisibilityIcon size={20} color="white" />
+          </Box>
+        </Box>
+      ),
+    },
+    {
+      field: "thumbnailUrl",
+      headerName: "Thumbnail",
+      width: 100,
+      renderCell: (params) => (
+        <Box sx={{ position: 'relative', display: 'inline-block' }}>
+          <img src={params.value} alt="Thumbnail" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+          <Box
+            sx={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              opacity: 0,
+              transition: 'opacity 0.3s',
+              '&:hover': { opacity: 1 },
+              cursor: 'pointer',
+            }}
+            onClick={() => { setSelectedImage(params.value); setImageDialogOpen(true); }}
+          >
+            <VisibilityIcon size={20} color="white" />
+          </Box>
+        </Box>
       ),
     },
     {
@@ -408,6 +471,16 @@ const PageList: React.FC = () => {
             Delete
           </Button>
         </DialogActions>
+      </Dialog>
+      {/* Image Preview Dialog */}
+      <Dialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        maxWidth="md"
+      >
+        <DialogContent>
+          <img src={selectedImage} alt="Full Image" style={{ width: '100%', height: 'auto' }} />
+        </DialogContent>
       </Dialog>
     </Box>
   );
