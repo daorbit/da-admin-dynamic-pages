@@ -52,7 +52,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       href: "/pages",
       icon: FileText,
       current: location.pathname === "/pages",
-    }
+    },
   ];
 
   const isCollapsed = !isMobile;
@@ -60,7 +60,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const drawer = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
       <Box>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", p: 2 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            p: 2,
+          }}
+        >
           <Home color="#1976d2" />
           {!isCollapsed && (
             <Typography variant="h6" noWrap component="div" sx={{ ml: 1 }}>
@@ -79,9 +86,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   to={item.href}
                   selected={item.current}
                   onClick={() => isMobile && setMobileOpen(false)}
-                  sx={{ justifyContent: isCollapsed ? "center" : "flex-start", px: 1 }}
+                  sx={{
+                    justifyContent: isCollapsed ? "center" : "flex-start",
+                    px: 1,
+                    mt: 2,
+                  }}
                 >
-                  <ListItemIcon sx={{ minWidth: "auto", mr: isCollapsed ? 0 : 2 }}>
+                  <ListItemIcon
+                    sx={{ minWidth: "auto", mr: isCollapsed ? 0 : 2 }}
+                  >
                     <Icon />
                   </ListItemIcon>
                   {!isCollapsed && <ListItemText primary={item.name} />}
@@ -101,7 +114,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 logout();
                 if (isMobile) setMobileOpen(false);
               }}
-              sx={{ justifyContent: isCollapsed ? "center" : "flex-start", px: 1 }}
+              sx={{
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                px: 1,
+              }}
             >
               <ListItemIcon sx={{ minWidth: "auto", mr: isCollapsed ? 0 : 2 }}>
                 <LogOut />

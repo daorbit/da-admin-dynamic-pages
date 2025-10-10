@@ -16,6 +16,7 @@
     "@mui/icons-material": "^5.14.19",
     "@mui/material": "^5.14.20",
     "@mui/x-data-grid": "^6.18.4",
+    "@mui/x-data-grid-pro": "^8.14.0",
     "@reduxjs/toolkit": "^2.9.0",
     "axios": "^1.6.2",
     "jquery": "^3.7.1",
