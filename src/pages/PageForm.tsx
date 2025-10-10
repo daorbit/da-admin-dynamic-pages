@@ -1,85 +1,84 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
-import { useForm, Controller } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
+import React, { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from "yup";
 import {
   Box,
   Typography,
-  Paper,
   TextField,
   Button,
   FormControl,
-  InputLabel,
   Select,
   MenuItem,
   Chip,
-//   OutlinedInput,
   CircularProgress,
   Alert,
   Grid,
   FormHelperText,
-} from '@mui/material'
-import {
-  Save as SaveIcon,
-  Cancel as CancelIcon,
-} from '@mui/icons-material'
-import { pagesAPI } from '../services/api'
-import SummernoteEditor, { SummernoteEditorRef } from '../components/SummernoteEditor'
-import QuillEditor, { QuillEditorRef } from '../components/QuillEditor'
-import { useAppDispatch } from '../store/hooks'
-import { createPage } from '../store/slices/pagesSlice'
-import type { CreatePageData } from '../types'
+} from "@mui/material";
+import { pagesAPI } from "../services/api";
+import SummernoteEditor, {
+  SummernoteEditorRef,
+} from "../components/SummernoteEditor";
+import QuillEditor, { QuillEditorRef } from "../components/QuillEditor";
+import { useAppDispatch } from "../store/hooks";
+import { createPage } from "../store/slices/pagesSlice";
+import type { CreatePageData } from "../types";
 
-// Validation schema
 const pageSchema = yup.object({
   title: yup
     .string()
-    .required('Title is required')
-    .max(200, 'Title cannot be more than 200 characters'),
+    .required("Title is required")
+    .max(200, "Title cannot be more than 200 characters"),
   description: yup
     .string()
-    .required('Description is required')
-    .max(500, 'Description cannot be more than 500 characters'),
+    .required("Description is required")
+    .max(500, "Description cannot be more than 500 characters"),
   imageUrl: yup
     .string()
-    .required('Image URL is required')
-    .url('Must be a valid URL'),
+    .required("Image URL is required")
+    .url("Must be a valid URL"),
   thumbnailUrl: yup
     .string()
-    .required('Thumbnail URL is required')
-    .url('Must be a valid URL'),
+    .required("Thumbnail URL is required")
+    .url("Must be a valid URL"),
   groups: yup
     .array()
     .of(yup.string().required())
     .defined()
     .default([])
-    .max(10, 'Cannot have more than 10 groups'),
+    .max(10, "Cannot have more than 10 groups"),
   editorType: yup
     .string()
-    .required('Editor type is required')
-    .oneOf(['summernote', 'quill'] as const, 'Editor type must be markdown, summernote, or quill'),
+    .required("Editor type is required")
+    .oneOf(
+      ["summernote", "quill"] as const,
+      "Editor type must be markdown, summernote, or quill"
+    ),
   slug: yup
     .string()
     .optional()
-    .max(100, 'Slug cannot be more than 100 characters')
-    .matches(/^[a-z0-9-]*$/, 'Slug can only contain lowercase letters, numbers, and hyphens'),
-  content: yup
-    .string(),
-}) satisfies yup.ObjectSchema<CreatePageData>
+    .max(100, "Slug cannot be more than 100 characters")
+    .matches(
+      /^[a-z0-9-]*$/,
+      "Slug can only contain lowercase letters, numbers, and hyphens"
+    ),
+  content: yup.string(),
+}) satisfies yup.ObjectSchema<CreatePageData>;
 
 const PageForm: React.FC = () => {
-  const navigate = useNavigate()
-  const { id } = useParams<{ id: string }>()
-  const isEditing = Boolean(id)
-  const dispatch = useAppDispatch()
-  
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [groupInput, setGroupInput] = useState('')
+  const navigate = useNavigate();
+  const { id } = useParams<{ id: string }>();
+  const isEditing = Boolean(id);
+  const dispatch = useAppDispatch();
 
-  const summernoteRef = useRef<SummernoteEditorRef>(null)
-  const quillRef = useRef<QuillEditorRef>(null)
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [groupInput, setGroupInput] = useState("");
+
+  const summernoteRef = useRef<SummernoteEditorRef>(null);
+  const quillRef = useRef<QuillEditorRef>(null);
 
   const {
     control,
@@ -91,43 +90,43 @@ const PageForm: React.FC = () => {
   } = useForm<CreatePageData>({
     resolver: yupResolver(pageSchema),
     defaultValues: {
-      title: '',
-      description: '',
-      imageUrl: '',
-      thumbnailUrl: '',
+      title: "",
+      description: "",
+      imageUrl: "",
+      thumbnailUrl: "",
       groups: [],
-      editorType: 'summernote' as const,
-      slug: '',
+      editorType: "summernote" as const,
+      slug: "",
       content: undefined,
     },
-  })
+  });
 
-  const watchedTitle = watch('title')
-  const watchedGroups = watch('groups')
-  const watchedEditorType = watch('editorType')
+  const watchedTitle = watch("title");
+  const watchedGroups = watch("groups");
+  const watchedEditorType = watch("editorType");
 
   // Auto-generate slug from title
   useEffect(() => {
     if (watchedTitle && !isEditing) {
       const slug = watchedTitle
         .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim()
-      setValue('slug', slug)
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      setValue("slug", slug);
     }
-  }, [watchedTitle, setValue, isEditing])
+  }, [watchedTitle, setValue, isEditing]);
 
   // Load page data for editing
   useEffect(() => {
     if (isEditing && id) {
       const loadPage = async () => {
         try {
-          setLoading(true)
-          const response = await pagesAPI.getById(id)
-          const page = response.data
-          
+          setLoading(true);
+          const response = await pagesAPI.getById(id);
+          const page = response.data;
+
           reset({
             title: page.title,
             description: page.description,
@@ -137,65 +136,68 @@ const PageForm: React.FC = () => {
             editorType: page.editorType,
             slug: page.slug,
             content: page.content,
-          })
+          });
         } catch (err) {
-          console.error('Error loading page:', err)
-          setError('Failed to load page data')
+          console.error("Error loading page:", err);
+          setError("Failed to load page data");
         } finally {
-          setLoading(false)
+          setLoading(false);
         }
-      }
-      
-      loadPage()
+      };
+
+      loadPage();
     }
-  }, [id, isEditing, reset])
+  }, [id, isEditing, reset]);
 
   const onSubmit = async (data: CreatePageData) => {
-    let currentContent = data.content
-    if (data.editorType === 'summernote' && summernoteRef.current) {
-      currentContent = summernoteRef.current.getContent()
-    } else if (data.editorType === 'quill' && quillRef.current) {
-      currentContent = quillRef.current.getContent()
+    let currentContent = data.content;
+    if (data.editorType === "summernote" && summernoteRef.current) {
+      currentContent = summernoteRef.current.getContent();
+    } else if (data.editorType === "quill" && quillRef.current) {
+      currentContent = quillRef.current.getContent();
     }
     // For markdown, use the form data directly
-    const finalData = { ...data, content: currentContent }
-    console.log('Form data being submitted:', finalData)
+    const finalData = { ...data, content: currentContent };
+    console.log("Form data being submitted:", finalData);
     try {
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       if (isEditing && id) {
-        await pagesAPI.update(id, { ...finalData, _id: id })
+        await pagesAPI.update(id, { ...finalData, _id: id });
       } else {
-        await dispatch(createPage(finalData))
+        await dispatch(createPage(finalData));
       }
 
-      navigate('/pages')
+      navigate("/pages");
     } catch (err) {
-      console.error('Error saving page:', err)
-      setError(isEditing ? 'Failed to update page' : 'Failed to create page')
+      console.error("Error saving page:", err);
+      setError(isEditing ? "Failed to update page" : "Failed to create page");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleAddGroup = () => {
     if (groupInput.trim() && !watchedGroups.includes(groupInput.trim())) {
-      setValue('groups', [...watchedGroups, groupInput.trim()])
-      setGroupInput('')
+      setValue("groups", [...watchedGroups, groupInput.trim()]);
+      setGroupInput("");
     }
-  }
+  };
 
   const handleRemoveGroup = (groupToRemove: string) => {
-    setValue('groups', watchedGroups.filter(group => group !== groupToRemove))
-  }
+    setValue(
+      "groups",
+      watchedGroups.filter((group) => group !== groupToRemove)
+    );
+  };
 
   const handleGroupInputKeyPress = (event: React.KeyboardEvent) => {
-    if (event.key === 'Enter') {
-      event.preventDefault()
-      handleAddGroup()
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleAddGroup();
     }
-  }
+  };
 
   // if (loading && isEditing) {
   //   return (
@@ -207,8 +209,8 @@ const PageForm: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" component="h1" gutterBottom>
-        {isEditing ? 'Edit Page' : 'Create New Page'}
+      <Typography variant="h4" gutterBottom>
+        {isEditing ? "Edit Page" : "Create New Page"}
       </Typography>
 
       {error && (
@@ -217,10 +219,13 @@ const PageForm: React.FC = () => {
         </Alert>
       )}
 
-      <Paper sx={{ p: 3 }}>
+      <Box sx={{ py: 3 }}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Grid container spacing={3}>
             <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Title *
+              </Typography>
               <Controller
                 name="title"
                 control={control}
@@ -228,16 +233,23 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Title *"
                     placeholder="Enter page title"
                     error={!!errors.title}
-                    helperText={errors.title?.message || 'Required: Page title (max 200 characters)'}
+                    helperText={errors.title?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
                   />
                 )}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Slug
+              </Typography>
               <Controller
                 name="slug"
                 control={control}
@@ -245,15 +257,23 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Slug"
+                    placeholder="Enter slug"
                     error={!!errors.slug}
-                    helperText={errors.slug?.message || 'URL-friendly identifier'}
+                    helperText={errors.slug?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
                   />
                 )}
               />
             </Grid>
 
             <Grid item xs={12}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Description *
+              </Typography>
               <Controller
                 name="description"
                 control={control}
@@ -263,16 +283,23 @@ const PageForm: React.FC = () => {
                     fullWidth
                     multiline
                     rows={3}
-                    label="Description *"
                     placeholder="Enter page description"
                     error={!!errors.description}
-                    helperText={errors.description?.message || 'Required: Page description (max 500 characters)'}
+                    helperText={errors.description?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
                   />
                 )}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Image URL *
+              </Typography>
               <Controller
                 name="imageUrl"
                 control={control}
@@ -280,16 +307,23 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Image URL *"
                     placeholder="https://example.com/image.jpg"
                     error={!!errors.imageUrl}
-                    helperText={errors.imageUrl?.message || 'Required: Full-size image URL'}
+                    helperText={errors.imageUrl?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
                   />
                 )}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Thumbnail URL *
+              </Typography>
               <Controller
                 name="thumbnailUrl"
                 control={control}
@@ -297,31 +331,39 @@ const PageForm: React.FC = () => {
                   <TextField
                     {...field}
                     fullWidth
-                    label="Thumbnail URL *"
                     placeholder="https://example.com/thumbnail.jpg"
                     error={!!errors.thumbnailUrl}
-                    helperText={errors.thumbnailUrl?.message || 'Required: Thumbnail image URL'}
+                    helperText={errors.thumbnailUrl?.message}
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
                   />
                 )}
               />
             </Grid>
 
             <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Editor Type *
+              </Typography>
               <Controller
                 name="editorType"
                 control={control}
                 render={({ field }) => (
                   <FormControl fullWidth error={!!errors.editorType}>
-                    <InputLabel>Editor Type *</InputLabel>
                     <Select
                       {...field}
-                      label="Editor Type *"
+                      sx={{
+                        borderRadius: "8px",
+                      }}
                     >
                       <MenuItem value="summernote">Summernote Editor</MenuItem>
                       <MenuItem value="quill">Quill Editor</MenuItem>
-                     </Select>
+                    </Select>
                     <FormHelperText>
-                      {errors.editorType?.message || 'Required: Content editor type'}
+                      {errors.editorType?.message}
                     </FormHelperText>
                   </FormControl>
                 )}
@@ -329,16 +371,24 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12} md={6}>
+              <Typography variant="body1" sx={{ mb: 1 }}>
+                Groups
+              </Typography>
               <Box>
                 <TextField
                   fullWidth
-                  label="Add Group"
+                  placeholder="Add Group"
                   value={groupInput}
                   onChange={(e) => setGroupInput(e.target.value)}
                   onKeyPress={handleGroupInputKeyPress}
-                  helperText="Press Enter to add group"
+                  helperText=""
+                  sx={{
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "8px",
+                    },
+                  }}
                 />
-                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
                   {watchedGroups.map((group, index) => (
                     <Chip
                       key={index}
@@ -359,7 +409,7 @@ const PageForm: React.FC = () => {
                     <Typography variant="subtitle1" sx={{ mb: 1 }}>
                       Content
                     </Typography>
-                    {watchedEditorType === 'summernote' ? (
+                    {watchedEditorType === "summernote" ? (
                       <SummernoteEditor
                         ref={summernoteRef}
                         value={field.value}
@@ -367,7 +417,7 @@ const PageForm: React.FC = () => {
                         placeholder="Enter your page content here..."
                         height={400}
                       />
-                    ) : watchedEditorType === 'quill' ? (
+                    ) : watchedEditorType === "quill" ? (
                       <QuillEditor
                         ref={quillRef}
                         value={field.value}
@@ -383,10 +433,17 @@ const PageForm: React.FC = () => {
                         fullWidth
                         placeholder="Enter your page content here..."
                         variant="outlined"
+                        sx={{
+                          "& .MuiOutlinedInput-root": {
+                            borderRadius: "8px",
+                          },
+                        }}
                       />
                     )}
                     {errors.content && (
-                      <FormHelperText error>{errors.content.message}</FormHelperText>
+                      <FormHelperText error>
+                        {errors.content.message}
+                      </FormHelperText>
                     )}
                   </Box>
                 )}
@@ -394,29 +451,25 @@ const PageForm: React.FC = () => {
             </Grid>
 
             <Grid item xs={12}>
-              <Box sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+              <Box sx={{ display: "flex", gap: 2, justifyContent: "flex-end" }}>
                 <Button
                   variant="outlined"
-                  startIcon={<CancelIcon />}
-                  onClick={() => navigate('/pages')}
+                  onClick={() => navigate("/pages")}
                   disabled={loading}
                 >
                   Cancel
                 </Button>
-                <Button
-                  type="submit"
-                  variant="contained"
-                  startIcon={<SaveIcon />}
-                >
-                  {loading ? <CircularProgress size={20} /> : (isEditing ? 'Update Page' : 'Create Page')}
+                <Button type="submit" variant="contained">
+                  {loading ? <CircularProgress size={20} /> : ""}
+                  Save
                 </Button>
               </Box>
             </Grid>
           </Grid>
         </form>
-      </Paper>
+      </Box>
     </Box>
-  )
-}
+  );
+};
 
-export default PageForm
+export default PageForm;

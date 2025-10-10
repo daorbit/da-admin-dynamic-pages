@@ -12,7 +12,7 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <Box sx={{ minHeight: '100vh', bgcolor: 'grey.100' }}>
+        <Box sx={{ minHeight: '100vh'}}>
           <ProtectedRoute>
             <Layout>
               <Routes>
