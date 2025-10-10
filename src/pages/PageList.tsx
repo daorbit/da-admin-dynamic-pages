@@ -152,8 +152,8 @@ const PageList: React.FC = () => {
       minWidth: 120,
     },
     {
-      field: "description",
-      headerName: "Description",
+      field: "slug",
+      headerName: "Slug",
       flex: 1,
       minWidth: 120,
       renderCell: (params) => (
