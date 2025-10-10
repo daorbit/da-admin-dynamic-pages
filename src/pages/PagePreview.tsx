@@ -55,7 +55,7 @@ const PagePreview: React.FC = () => {
 
   if (error || !page) {
     return (
-      <Container maxWidth="md" sx={{ py: 4 }}>
+      <Container maxWidth="md">
         <Alert severity="error" sx={{ mb: 2 }}>
           {error || "Page not found"}
         </Alert>
@@ -76,13 +76,13 @@ const PagePreview: React.FC = () => {
   }
 
   return (
-    <Box sx={{ py: 4 }}>
+    <Box>
       <Box sx={{ mb: 3 }}>
         <Button
           startIcon={<ArrowBackIcon />}
           onClick={() => navigate("/pages")}
           variant="outlined"
-          sx={{ 
+          sx={{
             mb: 2,
             borderRadius: "8px",
             textTransform: "none",

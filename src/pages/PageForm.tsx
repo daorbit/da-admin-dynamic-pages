@@ -77,11 +77,11 @@ const PageForm: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [groupInput, setGroupInput] = useState("");
-  const [selectedAI, setSelectedAI] = useState<AIProvider>('gemini');
+  const [selectedAI, setSelectedAI] = useState<AIProvider>("gemini");
 
   const { generateContent, generating } = useAIGeneration({
     onContentGenerated: (content: string) => {
-      setValue('content', content);
+      setValue("content", content);
     },
     onError: (errorMessage: string) => {
       setError(errorMessage);
@@ -211,8 +211,8 @@ const PageForm: React.FC = () => {
   };
 
   const handleGenerateContent = () => {
-    const title = watch('title');
-    const description = watch('description');
+    const title = watch("title");
+    const description = watch("description");
     generateContent(selectedAI, title, description);
   };
 
@@ -417,18 +417,26 @@ const PageForm: React.FC = () => {
                 control={control}
                 render={({ field }) => (
                   <Box>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                      <Typography
-                        variant="subtitle1"
-                        sx={{ fontSize: "13px" }}
-                      >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        mb: 1,
+                      }}
+                    >
+                      <Typography variant="subtitle1" sx={{ fontSize: "13px" }}>
                         Content
                       </Typography>
-                      <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                      <Box
+                        sx={{ display: "flex", gap: 2, alignItems: "center" }}
+                      >
                         <FormControl sx={{ minWidth: 200 }}>
                           <Select
                             value={selectedAI}
-                            onChange={(e) => setSelectedAI(e.target.value as AIProvider)}
+                            onChange={(e) =>
+                              setSelectedAI(e.target.value as AIProvider)
+                            }
                             displayEmpty
                             size="small"
                           >
@@ -441,9 +449,17 @@ const PageForm: React.FC = () => {
                           onClick={handleGenerateContent}
                           disabled={generating}
                           size="large"
-                          sx={{ minWidth: 150 ,borderRadius: "8px" ,boxShadow:"none"}}
+                          sx={{
+                            minWidth: 150,
+                            borderRadius: "8px",
+                            boxShadow: "none",
+                          }}
                         >
-                          {generating ? <CircularProgress size={20} /> : 'Generate with AI'}
+                          {generating ? (
+                            <CircularProgress size={20} />
+                          ) : (
+                            "Generate with AI"
+                          )}
                         </Button>
                       </Box>
                     </Box>
@@ -503,8 +519,8 @@ const PageForm: React.FC = () => {
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   variant="contained"
                   sx={{
                     borderRadius: "8px",
@@ -513,7 +529,14 @@ const PageForm: React.FC = () => {
                     px: 3,
                   }}
                 >
-                  {loading ? <CircularProgress size={20} /> : ""}
+                  {loading ? (
+                    <CircularProgress
+                      size={16}
+                      style={{ color: "#fff", marginRight: "8px" }}
+                    />
+                  ) : (
+                    ""
+                  )}
                   Save
                 </Button>
               </Box>
