@@ -12,7 +12,8 @@ export default defineConfig({
     sourcemap: true,
     commonjsOptions: {
       include: [/node_modules/],
-      extensions: ['.js', '.cjs']
+      extensions: ['.js', '.cjs'],
+      transformMixedEsModules: true
     },
     rollupOptions: {
       output: {
@@ -27,10 +28,16 @@ export default defineConfig({
   define: {
     global: 'globalThis',
     'process.env': {},
+    'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
   },
   optimizeDeps: {
     include: ['jquery', 'react-summernote-lite'],
-    force: true
+    force: true,
+    esbuildOptions: {
+      define: {
+        global: 'globalThis'
+      }
+    }
   },
   resolve: {
     alias: {
