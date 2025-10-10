@@ -54,11 +54,3 @@ export interface ErrorResponse {
     message: string
   }>
 }
-
-export interface HealthResponse {
-  status: string
-  message: string
-  timestamp: string
-  uptime: number
-  environment: string
-}

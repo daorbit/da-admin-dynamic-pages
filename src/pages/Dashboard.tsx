@@ -12,15 +12,13 @@ import {
 } from '@mui/material'
 import {
   Article as ArticleIcon,
-  TrendingUp as TrendingUpIcon,
-  Schedule as ScheduleIcon,
 } from '@mui/icons-material'
 import { useAppDispatch, useAppSelector } from '../store/hooks'
 import { fetchDashboardData } from '../store/slices/dashboardSlice'
 
 const Dashboard: React.FC = () => {
   const dispatch = useAppDispatch()
-  const { recentPages, totalPages, healthStatus, loading, error, lastFetched } = useAppSelector(
+  const { recentPages, totalPages, loading, error, lastFetched } = useAppSelector(
     (state) => state.dashboard
   )
 
@@ -68,41 +66,6 @@ const Dashboard: React.FC = () => {
                 </Typography>
                 <Typography variant="h4">
                   {totalPages}
-                </Typography>
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* System Status Card */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Card>
-            <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-              <TrendingUpIcon color="success" sx={{ fontSize: 40, mr: 2 }} />
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  System Status
-                </Typography>
-                <Chip 
-                  label={healthStatus?.status || 'Unknown'} 
-                  color={healthStatus?.status === 'OK' ? 'success' : 'error'}
-                />
-              </Box>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        {/* Uptime Card */}
-        <Grid item xs={12} sm={6} md={4}>
-          <Card>
-            <CardContent sx={{ display: 'flex', alignItems: 'center' }}>
-              <ScheduleIcon color="info" sx={{ fontSize: 40, mr: 2 }} />
-              <Box>
-                <Typography color="textSecondary" gutterBottom>
-                  Server Uptime
-                </Typography>
-                <Typography variant="h6">
-                  {healthStatus?.uptime ? `${Math.floor(healthStatus.uptime / 60)} min` : 'N/A'}
                 </Typography>
               </Box>
             </CardContent>

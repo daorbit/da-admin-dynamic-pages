@@ -5,8 +5,7 @@ import type {
   CreatePageData, 
   UpdatePageData, 
   PaginatedResponse, 
-  ApiResponse, 
-  HealthResponse 
+  ApiResponse 
 } from '../types'
 
 // Create axios instance with default config
@@ -86,16 +85,6 @@ export const pagesAPI = {
     enqueueSnackbar('Page deleted successfully!', { variant: 'success' })
     return response.data
   },
-}
-
-// Health check function
-export const healthCheck = async (): Promise<HealthResponse> => {
-  try {
-    const response: AxiosResponse<HealthResponse> = await api.get('/health')
-    return response.data
-  } catch (error) {
-    throw error
-  }
 }
 
 export default api

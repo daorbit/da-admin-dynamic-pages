@@ -1,11 +1,10 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { pagesAPI, healthCheck } from '../../services/api'
-import type { Page, HealthResponse } from '../../types'
+import { pagesAPI } from '../../services/api'
+import type { Page } from '../../types'
 
 interface DashboardState {
   recentPages: Page[]
   totalPages: number
-  healthStatus: HealthResponse | null
   loading: boolean
   error: string | null
   lastFetched: number | null // timestamp for caching
@@ -14,7 +13,6 @@ interface DashboardState {
 const initialState: DashboardState = {
   recentPages: [],
   totalPages: 0,
-  healthStatus: null,
   loading: false,
   error: null,
   lastFetched: null,
@@ -24,15 +22,11 @@ const initialState: DashboardState = {
 export const fetchDashboardData = createAsyncThunk(
   'dashboard/fetchDashboardData',
   async () => {
-    const [pagesResponse, health] = await Promise.all([
-      pagesAPI.getAll({ limit: 5, page: 1 }),
-      healthCheck()
-    ])
+    const pagesResponse = await pagesAPI.getAll({ limit: 5, page: 1 })
 
     return {
       recentPages: pagesResponse.data.pages,
       totalPages: pagesResponse.data.pagination.totalItems,
-      healthStatus: health,
     }
   }
 )
@@ -44,7 +38,6 @@ const dashboardSlice = createSlice({
     clearDashboardData: (state) => {
       state.recentPages = []
       state.totalPages = 0
-      state.healthStatus = null
       state.lastFetched = null
     },
   },
@@ -58,7 +51,6 @@ const dashboardSlice = createSlice({
         state.loading = false
         state.recentPages = action.payload.recentPages
         state.totalPages = action.payload.totalPages
-        state.healthStatus = action.payload.healthStatus
         state.lastFetched = Date.now()
       })
       .addCase(fetchDashboardData.rejected, (state, action) => {
