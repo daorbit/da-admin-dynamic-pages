@@ -23,6 +23,7 @@ export interface CreatePageData {
   editorType: "summernote" | "quill";
   slug?: string;
   content?: string;
+  aiReferences?: string;
 }
 
 export interface UpdatePageData extends CreatePageData {

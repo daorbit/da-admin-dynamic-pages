@@ -16,7 +16,8 @@ export const useAIGeneration = ({
   const generateContent = async (
     provider: AIProvider,
     title: string,
-    description: string
+    description: string,
+    references?: string
   ) => {
     if (!title || !description) {
       onError("Title and description are required for AI generation");
@@ -57,6 +58,7 @@ export const useAIGeneration = ({
 
 Title: "${title}"
 Description: "${description}"
+${references ? `Additional References: ${references}` : ''}
 
 Make the content SEO-friendly, engaging, and valuable for readers. Ensure it's well-structured and flows naturally.`,
                     },
