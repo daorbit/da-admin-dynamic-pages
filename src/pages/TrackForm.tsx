@@ -12,10 +12,13 @@ import {
   Alert,
   Grid,
   MenuItem,
+  IconButton,
 } from "@mui/material";
+import { Image } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { createTrack, updateTrack } from "../store/slices/tracksSlice";
 import { tracksAPI, playlistsAPI } from "../services/api";
+import ImageDialog from "../components/ImageDialog";
 import type { CreateTrackData, Playlist } from "../types";
 
 const trackSchema = yup.object({
@@ -53,12 +56,15 @@ const TrackForm: React.FC = () => {
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   const {
     control,
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
+    watch,
   } = useForm<CreateTrackData>({
     resolver: yupResolver(trackSchema),
     defaultValues: {
@@ -140,6 +146,10 @@ const TrackForm: React.FC = () => {
     } catch (err) {
       console.error("Error saving track:", err);
     }
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    setValue('thumbnail', imageUrl);
   };
 
   if (loadingTrack) {
@@ -334,25 +344,40 @@ const TrackForm: React.FC = () => {
 
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
-                Thumbnail URL
+                Thumbnail
               </Typography>
-              <Controller
-                name="thumbnail"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    error={!!errors.thumbnail}
-                    helperText={errors.thumbnail?.message}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
-                    }}
-                  />
-                )}
-              />
+              <Box display="flex" gap={1}>
+                <Controller
+                  name="thumbnail"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Enter image URL or select from gallery"
+                      error={!!errors.thumbnail}
+                      helperText={errors.thumbnail?.message}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                      }}
+                    />
+                  )}
+                />
+                <IconButton
+                  onClick={() => setImageDialogOpen(true)}
+                  sx={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <Image />
+                </IconButton>
+              </Box>
             </Grid>
 
             <Grid item xs={12}>
@@ -454,6 +479,13 @@ const TrackForm: React.FC = () => {
           </Box>
         </form>
       </Box>
+
+      <ImageDialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        onSelectImage={handleImageSelect}
+        currentImage={watch('thumbnail')}
+      />
     </Box>
   );
 };

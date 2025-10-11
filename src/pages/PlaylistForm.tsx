@@ -15,11 +15,14 @@ import {
   Switch,
   Chip,
   Autocomplete,
+  IconButton,
 } from "@mui/material";
+import { Image } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { createPlaylist, updatePlaylist } from "../store/slices/playlistsSlice";
 import { fetchTracks } from "../store/slices/tracksSlice";
 import { playlistsAPI } from "../services/api";
+import ImageDialog from "../components/ImageDialog";
 import type { CreatePlaylistData, Track } from "../types";
 
 const playlistSchema = yup.object({
@@ -44,6 +47,7 @@ const PlaylistForm: React.FC = () => {
   const [loadingPlaylist, setLoadingPlaylist] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedTracks, setSelectedTracks] = useState<Track[]>([]);
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
 
   const {
     control,
@@ -119,6 +123,10 @@ const PlaylistForm: React.FC = () => {
 
   const handleTagChange = (_event: any, newValue: string[]) => {
     setValue('tags', newValue);
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    setValue('thumbnail', imageUrl);
   };
 
   if (loadingPlaylist) {
@@ -241,25 +249,40 @@ const PlaylistForm: React.FC = () => {
 
             <Grid item xs={12} sm={6}>
               <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
-                Thumbnail URL
+                Thumbnail
               </Typography>
-              <Controller
-                name="thumbnail"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    error={!!errors.thumbnail}
-                    helperText={errors.thumbnail?.message}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
-                    }}
-                  />
-                )}
-              />
+              <Box display="flex" gap={1}>
+                <Controller
+                  name="thumbnail"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Enter image URL or select from gallery"
+                      error={!!errors.thumbnail}
+                      helperText={errors.thumbnail?.message}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                      }}
+                    />
+                  )}
+                />
+                <IconButton
+                  onClick={() => setImageDialogOpen(true)}
+                  sx={{
+                    border: '1px solid #e0e0e0',
+                    borderRadius: '8px',
+                    '&:hover': {
+                      backgroundColor: '#f5f5f5',
+                    },
+                  }}
+                >
+                  <Image />
+                </IconButton>
+              </Box>
             </Grid>
 
             <Grid item xs={12}>
@@ -401,6 +424,13 @@ const PlaylistForm: React.FC = () => {
           </Box>
         </form>
       </Box>
+
+      <ImageDialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        onSelectImage={handleImageSelect}
+        currentImage={watch('thumbnail')}
+      />
     </Box>
   );
 };

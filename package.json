@@ -19,6 +19,7 @@
     "@mui/x-data-grid-pro": "^8.14.0",
     "@reduxjs/toolkit": "^2.9.0",
     "axios": "^1.6.2",
+    "cloudinary": "^2.7.0",
     "jquery": "^3.7.1",
     "lucide-react": "^0.545.0",
     "notistack": "^3.0.1",

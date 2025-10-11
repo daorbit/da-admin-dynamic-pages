@@ -17,12 +17,15 @@ import {
   Grid,
   FormHelperText,
   Divider,
+  IconButton,
 } from "@mui/material";
+import { Image } from '@mui/icons-material';
 import { pagesAPI } from "../services/api";
 import SummernoteEditor, {
   SummernoteEditorRef,
 } from "../components/SummernoteEditor";
 import QuillEditor, { QuillEditorRef } from "../components/QuillEditor";
+import ImageDialog from "../components/ImageDialog";
 import { useAppDispatch } from "../store/hooks";
 import { createPage } from "../store/slices/pagesSlice";
 import { useAIGeneration, AIProvider } from "../hooks/useAIGeneration";
@@ -84,6 +87,8 @@ const PageForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [groupInput, setGroupInput] = useState("");
   const [selectedAI, setSelectedAI] = useState<AIProvider>("perplexity");
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [thumbnailDialogOpen, setThumbnailDialogOpen] = useState(false);
 
   const { generateContent, generating } = useAIGeneration({
     onContentGenerated: (content: string) => {
@@ -224,6 +229,14 @@ const PageForm: React.FC = () => {
     const description = watch("description");
     const aiReferences = watch("aiReferences");
     generateContent(selectedAI, title, description, aiReferences);
+  };
+
+  const handleImageSelect = (imageUrl: string) => {
+    setValue("imageUrl", imageUrl);
+  };
+
+  const handleThumbnailSelect = (imageUrl: string) => {
+    setValue("thumbnailUrl", imageUrl);
   };
 
   if (loading && isEditing) {
@@ -372,46 +385,76 @@ const PageForm: React.FC = () => {
                   <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                     Image URL *
                   </Typography>
-                  <Controller
-                    name="imageUrl"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        fullWidth
-                        error={!!errors.imageUrl}
-                        helperText={errors.imageUrl?.message}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      />
-                    )}
-                  />
+                  <Box display="flex" gap={1}>
+                    <Controller
+                      name="imageUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          placeholder="Enter image URL or select from gallery"
+                          error={!!errors.imageUrl}
+                          helperText={errors.imageUrl?.message}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "8px",
+                            },
+                          }}
+                        />
+                      )}
+                    />
+                    <IconButton
+                      onClick={() => setImageDialogOpen(true)}
+                      sx={{
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        '&:hover': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      }}
+                    >
+                      <Image />
+                    </IconButton>
+                  </Box>
                 </Grid>
 
                 <Grid item xs={12}>
                   <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                     Thumbnail URL *
                   </Typography>
-                  <Controller
-                    name="thumbnailUrl"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        fullWidth
-                        error={!!errors.thumbnailUrl}
-                        helperText={errors.thumbnailUrl?.message}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      />
-                    )}
-                  />
+                  <Box display="flex" gap={1}>
+                    <Controller
+                      name="thumbnailUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          placeholder="Enter thumbnail URL or select from gallery"
+                          error={!!errors.thumbnailUrl}
+                          helperText={errors.thumbnailUrl?.message}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "8px",
+                            },
+                          }}
+                        />
+                      )}
+                    />
+                    <IconButton
+                      onClick={() => setThumbnailDialogOpen(true)}
+                      sx={{
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '8px',
+                        '&:hover': {
+                          backgroundColor: '#f5f5f5',
+                        },
+                      }}
+                    >
+                      <Image />
+                    </IconButton>
+                  </Box>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -690,6 +733,20 @@ const PageForm: React.FC = () => {
           </Box>
         </form>
       </Box>
+
+      <ImageDialog
+        open={imageDialogOpen}
+        onClose={() => setImageDialogOpen(false)}
+        onSelectImage={handleImageSelect}
+        currentImage={watch('imageUrl')}
+      />
+
+      <ImageDialog
+        open={thumbnailDialogOpen}
+        onClose={() => setThumbnailDialogOpen(false)}
+        onSelectImage={handleThumbnailSelect}
+        currentImage={watch('thumbnailUrl')}
+      />
     </Box>
   );
 };

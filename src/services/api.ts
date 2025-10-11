@@ -14,6 +14,10 @@ import type {
   ApiResponse 
 } from '../types'
 
+// Cloudinary configuration
+const CLOUDINARY_CLOUD_NAME = (import.meta as any).env?.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name'
+const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env?.VITE_CLOUDINARY_UPLOAD_PRESET || 'your-upload-preset'
+
 // Create axios instance with default config
 const api = axios.create({
   baseURL: 'https://da-pages-be.vercel.app/api',
@@ -180,3 +184,46 @@ export const playlistsAPI = {
 }
 
 export default api
+
+// Cloudinary upload function
+export const uploadToCloudinary = async (file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('upload_preset', CLOUDINARY_UPLOAD_PRESET)
+  formData.append('cloud_name', CLOUDINARY_CLOUD_NAME)
+
+  try {
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+
+    if (response.data.secure_url) {
+      enqueueSnackbar('Image uploaded successfully!', { variant: 'success' })
+      return response.data.secure_url
+    } else {
+      throw new Error('Upload failed - no URL returned')
+    }
+  } catch (error) {
+    console.error('Cloudinary upload error:', error)
+    enqueueSnackbar('Failed to upload image', { variant: 'error' })
+    throw error
+  }
+}
+
+// Get uploaded images from Cloudinary
+export const getUploadedImages = async (): Promise<Array<{ public_id: string; secure_url: string; created_at: string }>> => {
+  try {
+    const response: AxiosResponse<{ images: Array<{ public_id: string; secure_url: string; created_at: string }> }> = await api.get('/images')
+    return response.data.images
+  } catch (error) {
+    console.error('Failed to fetch uploaded images:', error)
+    enqueueSnackbar('Failed to load uploaded images', { variant: 'error' })
+    return []
+  }
+}
