@@ -181,9 +181,7 @@ const PageForm: React.FC = () => {
     } else if (data.editorType === "quill" && quillRef.current) {
       currentContent = quillRef.current.getContent();
     }
-    // For markdown, use the form data directly
     const finalData = { ...data, content: currentContent };
-    console.log("Form data being submitted:", finalData);
     try {
       setLoading(true);
       setError(null);
