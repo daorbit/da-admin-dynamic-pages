@@ -13,6 +13,36 @@ export interface Page {
   updatedAt: string;
 }
 
+export interface Track {
+  _id: string;
+  title?: string;
+  author?: string;
+  description?: string;
+  duration?: string;
+  listeners?: string;
+  date?: string;
+  thumbnail?: string;
+  category?: string;
+  audioUrl?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Playlist {
+  _id: string;
+  title?: string;
+  description?: string;
+  trackCount: number;
+  duration?: string;
+  thumbnail?: string;
+  createdBy?: string;
+  createdAt: string;
+  tracks: Track[];
+  isPublic: boolean;
+  tags: string[];
+  updatedAt: string;
+}
+
 export interface CreatePageData {
   title: string;
   description: string;
@@ -30,10 +60,43 @@ export interface UpdatePageData extends CreatePageData {
   _id: string;
 }
 
+export interface CreateTrackData {
+  title?: string;
+  author?: string;
+  description?: string;
+  duration?: string;
+  listeners?: string;
+  date?: string;
+  thumbnail?: string;
+  category?: string;
+  audioUrl?: string;
+}
+
+export interface UpdateTrackData extends CreateTrackData {
+  _id: string;
+}
+
+export interface CreatePlaylistData {
+  title?: string;
+  description?: string;
+  duration?: string;
+  thumbnail?: string;
+  createdBy?: string;
+  tracks?: string[];
+  isPublic?: boolean;
+  tags?: string[];
+}
+
+export interface UpdatePlaylistData extends CreatePlaylistData {
+  _id: string;
+}
+
 export interface PaginatedResponse<T> {
   success: boolean;
   data: {
     pages: T[];
+    tracks?: T[];
+    playlists?: T[];
     pagination: {
       currentPage: number;
       totalPages: number;

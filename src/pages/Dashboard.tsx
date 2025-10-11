@@ -15,6 +15,8 @@ import {
   Eye,
   TrendingUp,
   DollarSign,
+  Music,
+  ListMusic,
 } from "lucide-react";
 import Charts from "../components/Charts";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -24,6 +26,8 @@ const Dashboard: React.FC = () => {
   // Hard coded stats
   const stats = [
     { title: "Total Pages", value: 156, icon: FileText, color: "#2196f3" },
+    { title: "Total Tracks", value: 89, icon: Music, color: "#ff5722" },
+    { title: "Total Playlists", value: 23, icon: ListMusic, color: "#673ab7" },
     { title: "Total Users", value: 1250, icon: Users, color: "#4caf50" },
     { title: "Active Pages", value: 45, icon: Activity, color: "#ff9800" },
     { title: "Views Today", value: 3200, icon: Eye, color: "#9c27b0" },

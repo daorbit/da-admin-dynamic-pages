@@ -13,7 +13,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { Home, LayoutDashboard, FileText, LogOut } from "lucide-react";
+import { Home, LayoutDashboard, FileText, LogOut, Music, ListMusic } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 interface LayoutProps {
@@ -52,6 +52,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       href: "/pages",
       icon: FileText,
       current: location.pathname === "/pages",
+    },
+    {
+      name: "Tracks",
+      href: "/tracks",
+      icon: Music,
+      current: location.pathname === "/tracks",
+    },
+    {
+      name: "Playlists",
+      href: "/playlists",
+      icon: ListMusic,
+      current: location.pathname === "/playlists",
     },
   ];
 
