@@ -59,6 +59,14 @@ export const createPage = createAsyncThunk(
   }
 )
 
+export const updatePage = createAsyncThunk(
+  'pages/updatePage',
+  async ({ id, pageData }: { id: string; pageData: any }) => {
+    const response = await pagesAPI.update(id, pageData)
+    return response.data
+  }
+)
+
 const pagesSlice = createSlice({
   name: 'pages',
   initialState,
@@ -101,6 +109,10 @@ const pagesSlice = createSlice({
         state.pagination.totalItems -= 1
       })
       .addCase(createPage.fulfilled, (state) => {
+        // Invalidate cache so the list refetches data
+        state.lastFetched = null
+      })
+      .addCase(updatePage.fulfilled, (state) => {
         // Invalidate cache so the list refetches data
         state.lastFetched = null
       })

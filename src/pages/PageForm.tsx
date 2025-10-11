@@ -19,7 +19,7 @@ import {
   Divider,
   IconButton,
 } from "@mui/material";
-import { Image } from '@mui/icons-material';
+import { Image } from "@mui/icons-material";
 import { pagesAPI } from "../services/api";
 import SummernoteEditor, {
   SummernoteEditorRef,
@@ -27,7 +27,7 @@ import SummernoteEditor, {
 import QuillEditor, { QuillEditorRef } from "../components/QuillEditor";
 import ImageDialog from "../components/ImageDialog";
 import { useAppDispatch } from "../store/hooks";
-import { createPage } from "../store/slices/pagesSlice";
+import { createPage, updatePage } from "../store/slices/pagesSlice";
 import { useAIGeneration, AIProvider } from "../hooks/useAIGeneration";
 import type { CreatePageData } from "../types";
 
@@ -187,11 +187,11 @@ const PageForm: React.FC = () => {
       setError(null);
 
       if (isEditing && id) {
-        await pagesAPI.update(id, { ...finalData, _id: id });
+        await dispatch(updatePage({ id, pageData: finalData }));
       } else {
         await dispatch(createPage(finalData));
       }
-
+      navigate("/pages");
     } catch (err) {
       console.error("Error saving page:", err);
       setError(isEditing ? "Failed to update page" : "Failed to create page");
@@ -404,10 +404,10 @@ const PageForm: React.FC = () => {
                     <IconButton
                       onClick={() => setImageDialogOpen(true)}
                       sx={{
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        '&:hover': {
-                          backgroundColor: '#f5f5f5',
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        "&:hover": {
+                          backgroundColor: "#f5f5f5",
                         },
                       }}
                     >
@@ -442,10 +442,10 @@ const PageForm: React.FC = () => {
                     <IconButton
                       onClick={() => setThumbnailDialogOpen(true)}
                       sx={{
-                        border: '1px solid #e0e0e0',
-                        borderRadius: '8px',
-                        '&:hover': {
-                          backgroundColor: '#f5f5f5',
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        "&:hover": {
+                          backgroundColor: "#f5f5f5",
                         },
                       }}
                     >
@@ -629,13 +629,18 @@ const PageForm: React.FC = () => {
                                 minWidth: 150,
                                 borderRadius: "8px",
                                 boxShadow: "none",
+                                color: "#fff",
                               }}
                             >
                               {generating ? (
-                                <CircularProgress size={20} />
+                                <CircularProgress
+                                  size={18}
+                                  sx={{ color: "#fff", marginRight: "8px" }}
+                                />
                               ) : (
-                                "Generate with AI"
+                                ""
                               )}
+                              Generate with AI
                             </Button>
                           </Box>
                         </Box>

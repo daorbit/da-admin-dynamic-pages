@@ -31,7 +31,7 @@ import {
   Trash2 as DeleteIcon,
   Search as SearchIcon,
   Eye as VisibilityIcon,
-} from 'lucide-react'
+} from "lucide-react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchPages,
@@ -57,7 +57,7 @@ const PageList: React.FC = () => {
   const [selectedGroups, setSelectedGroups] = React.useState<string[]>([]);
 
   const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
-  const [selectedImage, setSelectedImage] = React.useState<string>('');
+  const [selectedImage, setSelectedImage] = React.useState<string>("");
 
   // Get unique groups for filter dropdown
   const availableGroups = useMemo(() => {
@@ -174,61 +174,39 @@ const PageList: React.FC = () => {
       headerName: "Image",
       width: 100,
       renderCell: (params) => (
-        <Box sx={{ position: 'relative', display: 'inline-block' }}>
-          <img src={params.value} alt="Page Image" style={{ width: 50, height: 50, objectFit: 'cover' }} />
+        <Box sx={{ position: "relative", display: "inline-block" }}>
+          <img
+            src={params.value}
+            alt="Page Image"
+            style={{ width: 50, height: 50, objectFit: "cover" }}
+          />
           <Box
             sx={{
-              position: 'absolute',
+              position: "absolute",
               top: 0,
               left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(0,0,0,0.5)',
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "rgba(0,0,0,0.5)",
               opacity: 0,
-              transition: 'opacity 0.3s',
-              '&:hover': { opacity: 1 },
-              cursor: 'pointer',
+              transition: "opacity 0.3s",
+              "&:hover": { opacity: 1 },
+              cursor: "pointer",
             }}
-            onClick={() => { setSelectedImage(params.value); setImageDialogOpen(true); }}
+            onClick={() => {
+              setSelectedImage(params.value);
+              setImageDialogOpen(true);
+            }}
           >
             <VisibilityIcon size={20} color="white" />
           </Box>
         </Box>
       ),
     },
-    {
-      field: "thumbnailUrl",
-      headerName: "Thumbnail",
-      width: 100,
-      renderCell: (params) => (
-        <Box sx={{ position: 'relative', display: 'inline-block' }}>
-          <img src={params.value} alt="Thumbnail" style={{ width: 50, height: 50, objectFit: 'cover' }} />
-          <Box
-            sx={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              width: '100%',
-              height: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              opacity: 0,
-              transition: 'opacity 0.3s',
-              '&:hover': { opacity: 1 },
-              cursor: 'pointer',
-            }}
-            onClick={() => { setSelectedImage(params.value); setImageDialogOpen(true); }}
-          >
-            <VisibilityIcon size={20} color="white" />
-          </Box>
-        </Box>
-      ),
-    },
+
     {
       field: "groups",
       headerName: "Groups",
@@ -246,18 +224,6 @@ const PageList: React.FC = () => {
             />
           )}
         </Box>
-      ),
-    },
-    {
-      field: "editorType",
-      headerName: "Editor",
-      width: 100,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          size="small"
-          color={params.value === "summernote" ? "primary" : "secondary"}
-        />
       ),
     },
     {
@@ -326,7 +292,7 @@ const PageList: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon size={20} />}
-          onClick={() => navigate('/pages/new')}
+          onClick={() => navigate("/pages/new")}
           sx={{
             borderRadius: "8px",
             textTransform: "none",
@@ -449,7 +415,7 @@ const PageList: React.FC = () => {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button 
+          <Button
             onClick={() => setDeleteDialogOpen(false)}
             sx={{
               borderRadius: "8px",
@@ -458,9 +424,9 @@ const PageList: React.FC = () => {
           >
             Cancel
           </Button>
-          <Button 
-            onClick={confirmDelete} 
-            color="error" 
+          <Button
+            onClick={confirmDelete}
+            color="error"
             variant="contained"
             sx={{
               borderRadius: "8px",
@@ -479,7 +445,11 @@ const PageList: React.FC = () => {
         maxWidth="md"
       >
         <DialogContent>
-          <img src={selectedImage} alt="Full Image" style={{ width: '100%', height: 'auto' }} />
+          <img
+            src={selectedImage}
+            alt="Full Image"
+            style={{ width: "100%", height: "auto" }}
+          />
         </DialogContent>
       </Dialog>
     </Box>
