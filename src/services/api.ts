@@ -227,3 +227,16 @@ export const getUploadedImages = async (): Promise<Array<{ public_id: string; se
     return []
   }
 }
+
+// Delete image from Cloudinary
+export const deleteUploadedImage = async (publicId: string): Promise<{ publicId: string }> => {
+  try {
+    const response: AxiosResponse<{ message: string; publicId: string }> = await api.delete(`/images/${publicId}`)
+    enqueueSnackbar('Image deleted successfully!', { variant: 'success' })
+    return response.data
+  } catch (error) {
+    console.error('Failed to delete uploaded image:', error)
+    enqueueSnackbar('Failed to delete image', { variant: 'error' })
+    throw error
+  }
+}

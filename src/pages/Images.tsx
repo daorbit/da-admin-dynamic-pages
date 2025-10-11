@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -8,18 +8,31 @@ import {
   CardContent,
   CircularProgress,
   Alert,
+  IconButton,
+  Button,
+  Input,
 } from "@mui/material";
+import {
+  Delete as DeleteIcon,
+  CloudUpload as CloudUploadIcon,
+} from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchImages } from "../store/slices/imagesSlice";
+import { fetchImages, deleteImage } from "../store/slices/imagesSlice";
+import { uploadToCloudinary } from "../services/api";
 
 const Images: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { items: images, loading, error, lastFetched } = useAppSelector(
-    (state) => state.images
-  );
+  const {
+    items: images,
+    loading,
+    error,
+    lastFetched,
+  } = useAppSelector((state) => state.images);
+
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   useEffect(() => {
-    const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+    const CACHE_DURATION = 5 * 60 * 1000;
     const shouldFetch =
       !lastFetched || Date.now() - lastFetched > CACHE_DURATION;
 
@@ -27,6 +40,31 @@ const Images: React.FC = () => {
       dispatch(fetchImages());
     }
   }, [dispatch, lastFetched]);
+
+  const handleDeleteImage = (publicId: string) => {
+    if (window.confirm("Are you sure you want to delete this image?")) {
+      dispatch(deleteImage(publicId));
+    }
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadLoading(true);
+      try {
+        await uploadToCloudinary(file);
+        // Reset file input
+        const fileInput = document.getElementById("image-upload") as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+        // Refresh images list
+        dispatch(fetchImages());
+      } catch (error) {
+        console.error("Upload failed:", error);
+      } finally {
+        setUploadLoading(false);
+      }
+    }
+  };
 
   if (loading) {
     return (
@@ -50,10 +88,32 @@ const Images: React.FC = () => {
   }
 
   return (
-    <Box sx={{ flexGrow: 1}}>
-      <Typography variant="h6" component="h1" gutterBottom>
-        Uploaded Images
-      </Typography>
+    <Box sx={{ flexGrow: 1 }}>
+      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography variant="h6" component="h1" gutterBottom>
+          Uploaded Images
+        </Typography>
+
+        <Box sx={{ mb: 3, display: "flex", gap: 2, alignItems: "center" }}>
+          <Input
+            type="file"
+            inputProps={{ accept: "image/*" }}
+            id="image-upload"
+            onChange={handleFileSelect}
+            sx={{ display: "none" }}
+          />
+          <Button
+            variant="contained"
+            component="label"
+            htmlFor="image-upload"
+            startIcon={uploadLoading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+            disabled={uploadLoading}
+            sx={{borderRadius:"8px",boxShadow:"none"}}
+          >
+            {uploadLoading ? "Uploading..." : "Upload Image"}
+          </Button>
+        </Box>
+      </Box>
 
       {images.length === 0 ? (
         <Box sx={{ mt: 4, textAlign: "center" }}>
@@ -65,7 +125,32 @@ const Images: React.FC = () => {
         <Grid container spacing={3} sx={{ mt: 2 }}>
           {images.map((image) => (
             <Grid item xs={12} sm={6} md={4} lg={3} key={image.public_id}>
-              <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "none",
+                  position: "relative",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                }}
+              >
+                <IconButton
+                  onClick={() => handleDeleteImage(image.public_id)}
+                  sx={{
+                    position: "absolute",
+                    top: 8,
+                    right: 8,
+                    backgroundColor: "rgba(255, 255, 255, 0.8)",
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                    },
+                  }}
+                  size="small"
+                >
+                  <DeleteIcon color="error" />
+                </IconButton>
                 <CardMedia
                   component="img"
                   height="200"
@@ -77,7 +162,11 @@ const Images: React.FC = () => {
                   <Typography variant="body2" color="text.secondary">
                     Uploaded: {new Date(image.created_at).toLocaleDateString()}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 1 }}>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
                     {image.public_id}
                   </Typography>
                 </CardContent>
