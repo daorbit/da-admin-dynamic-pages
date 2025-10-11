@@ -47,20 +47,13 @@ export const useAIGeneration = ({
                 {
                   parts: [
                     {
-                      text: `Write a comprehensive blog post with the following title and description. Structure it professionally with:
-
-1. An engaging introduction that hooks the reader
-2. 3-4 main body sections with descriptive headings
-3. Each section should have 2-3 paragraphs of detailed, informative content
-4. Include relevant examples, statistics, or insights where appropriate
-5. A compelling conclusion that summarizes key points and includes a call-to-action
-6. Use proper HTML formatting with <h2> for section headings, <p> for paragraphs, <strong> for emphasis, and <ul>/<li> for lists where needed
+                      text: `Write a comprehensive and engaging blog post based on the following title and description. Create natural, flowing content that feels authentic and valuable to readers. Use descriptive headings for different sections, include relevant examples or insights where they fit naturally, and format with appropriate HTML tags like <h2> for headings, <p> for paragraphs, <strong> for emphasis, and <ul>/<li> for lists when helpful.
 
 Title: "${title}"
 Description: "${description}"
 ${references ? `Additional References: ${references}` : ''}
 
-Make the content SEO-friendly, engaging, and valuable for readers. Ensure it's well-structured and flows naturally.`,
+Focus on creating content that reads like it was written by a knowledgeable expert, not an AI. Avoid forced conclusions or overly structured formats.`,
                     },
                   ],
                 },
@@ -94,19 +87,12 @@ Make the content SEO-friendly, engaging, and valuable for readers. Ensure it's w
               messages: [
                 {
                   role: "user",
-                  content: `Write a comprehensive blog post with the following title and description. Structure it professionally with:
-
-1. An engaging introduction that hooks the reader
-2. 3-4 main body sections with descriptive headings
-3. Each section should have 2-3 paragraphs of detailed, informative content
-4. Include relevant examples, statistics, or insights where appropriate
-5. A compelling conclusion that summarizes key points and includes a call-to-action
-6. Use proper HTML formatting with <h2> for section headings, <p> for paragraphs, <strong> for emphasis, and <ul>/<li> for lists where needed
+                  content: `Write a comprehensive and engaging blog post based on the following title and description. Create natural, flowing content that feels authentic and valuable to readers. Use descriptive headings for different sections, include relevant examples or insights where they fit naturally, and format with appropriate HTML tags like <h2> for headings, <p> for paragraphs, <strong> for emphasis, and <ul>/<li> for lists when helpful.
 
 Title: "${title}"
 Description: "${description}"
 
-Make the content SEO-friendly, engaging, and valuable for readers. Ensure it's well-structured and flows naturally.`,
+Focus on creating content that reads like it was written by a knowledgeable expert, not an AI. Avoid forced conclusions or overly structured formats.`,
                 },
               ],
             }),

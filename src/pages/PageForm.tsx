@@ -242,7 +242,7 @@ const PageForm: React.FC = () => {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="100%"
+        minHeight="100vh"
       >
         <CircularProgress />
       </Box>
