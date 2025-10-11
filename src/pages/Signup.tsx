@@ -9,27 +9,30 @@ import {
   Container,
   InputAdornment,
   IconButton,
-  // Link,
+  Link,
 } from '@mui/material'
 import {
-  Login as LoginIcon,
+  PersonAdd as PersonAddIcon,
   Visibility,
   VisibilityOff,
   AdminPanelSettings,
 } from '@mui/icons-material'
-import {  useNavigate } from 'react-router-dom'
-import { useAuth } from '../contexts/AuthContext'
+import { Link as RouterLink, useNavigate } from 'react-router-dom'
+import axios from 'axios'
+import { enqueueSnackbar } from 'notistack'
 
-const Login: React.FC = () => {
-  const { login } = useAuth()
+const Signup: React.FC = () => {
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
     username: '',
+    email: '',
     password: '',
+    confirmPassword: '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
@@ -45,15 +48,27 @@ const Login: React.FC = () => {
     setLoading(true)
     setError('')
 
+    // Validate passwords match
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match')
+      setLoading(false)
+      return
+    }
+
     try {
-      const success = await login(formData.username, formData.password)
-      if (success) {
-        navigate('/')
-      } else {
-        setError('Invalid username or password')
+      const response = await axios.post('https://da-pages-be.vercel.app/api/auth/register', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      })
+
+      if (response.data.token && response.data.user) {
+        enqueueSnackbar('Account created successfully! Please log in.', { variant: 'success' })
+        navigate('/login')
       }
-    } catch (err) {
-      setError('Login failed. Please try again.')
+    } catch (err: any) {
+      const message = err.response?.data?.message || 'Registration failed. Please try again.'
+      setError(message)
     } finally {
       setLoading(false)
     }
@@ -61,6 +76,10 @@ const Login: React.FC = () => {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword)
+  }
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword)
   }
 
   return (
@@ -97,9 +116,9 @@ const Login: React.FC = () => {
               DA CMS
             </Typography>
           </Box>
-          
+
           <Typography component="h2" variant="h6" sx={{ mb: 3, color: 'text.secondary' }}>
-            Admin Login
+            Create Admin Account
           </Typography>
 
           {error && (
@@ -114,7 +133,8 @@ const Login: React.FC = () => {
               required
               fullWidth
               id="username"
-               name="username"
+              label="Username"
+              name="username"
               autoComplete="username"
               autoFocus
               value={formData.username}
@@ -125,10 +145,24 @@ const Login: React.FC = () => {
               margin="normal"
               required
               fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              disabled={loading}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
               name="password"
-               type={showPassword ? 'text' : 'password'}
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
               id="password"
-              autoComplete="current-password"
+              autoComplete="new-password"
               value={formData.password}
               onChange={handleChange}
               disabled={loading}
@@ -146,12 +180,38 @@ const Login: React.FC = () => {
                 ),
               }}
             />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              label="Confirm Password"
+              type={showConfirmPassword ? 'text' : 'password'}
+              id="confirmPassword"
+              autoComplete="new-password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              disabled={loading}
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle confirm password visibility"
+                      onClick={toggleConfirmPasswordVisibility}
+                      edge="end"
+                    >
+                      {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
             <Button
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ 
-                mt: 3, 
+              sx={{
+                mt: 3,
                 mb: 2,
                 borderRadius: "8px",
                 textTransform: "none",
@@ -159,21 +219,21 @@ const Login: React.FC = () => {
                 py: 1.5,
               }}
               disabled={loading}
-              startIcon={<LoginIcon />}
+              startIcon={<PersonAddIcon />}
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? 'Creating Account...' : 'Create Account'}
             </Button>
           </Box>
 
-          {/* <Box sx={{ mt: 2, width: '100%', textAlign: 'center' }}>
-            <Link component={RouterLink} to="/signup" variant="body2">
-              Don't have an account? Sign up
+          <Box sx={{ mt: 2, width: '100%', textAlign: 'center' }}>
+            <Link component={RouterLink} to="/login" variant="body2">
+              Already have an account? Sign in
             </Link>
-          </Box> */}
+          </Box>
         </Paper>
       </Box>
     </Container>
   )
 }
 
-export default Login
+export default Signup

@@ -30,7 +30,11 @@ const api = axios.create({
 // Request interceptor
 api.interceptors.request.use(
   (config) => {
-    // You can add auth tokens here later
+    // Add auth token to requests
+    const token = localStorage.getItem('da-cms-token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {

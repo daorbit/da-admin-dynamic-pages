@@ -1,8 +1,17 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import axios from 'axios'
+
+interface User {
+  id: string
+  username: string
+  email: string
+  role: string
+}
 
 interface AuthContextType {
   isAuthenticated: boolean
-  login: (username: string, password: string) => boolean
+  user: User | null
+  login: (username: string, password: string) => Promise<boolean>
   logout: () => void
   loading: boolean
 }
@@ -13,41 +22,72 @@ interface AuthProviderProps {
   children: ReactNode
 }
 
-// Simple hardcoded credentials - in production, this should be handled by your backend
-const ADMIN_CREDENTIALS = {
-  username: 'admin',
-  password: 'admin123'
-}
-
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     // Check if user is already logged in (from localStorage)
-    const authStatus = localStorage.getItem('da-cms-auth')
-    if (authStatus === 'true') {
-      setIsAuthenticated(true)
+    const token = localStorage.getItem('da-cms-token')
+    if (token) {
+      verifyToken(token)
+    } else {
+      setLoading(false)
     }
-    setLoading(false)
   }, [])
 
-  const login = (username: string, password: string): boolean => {
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-      setIsAuthenticated(true)
-      localStorage.setItem('da-cms-auth', 'true')
-      return true
+  const verifyToken = async (token: string) => {
+    try {
+      const response = await axios.get('https://da-pages-be.vercel.app/api/auth/verify', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+
+      if (response.data.user) {
+        setUser(response.data.user)
+        setIsAuthenticated(true)
+      }
+    } catch (error) {
+      // Token is invalid, remove it
+      localStorage.removeItem('da-cms-token')
+    } finally {
+      setLoading(false)
     }
-    return false
+  }
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    try {
+      const response = await axios.post('https://da-pages-be.vercel.app/api/auth/login', {
+        username,
+        password
+      })
+
+      if (response.data.token && response.data.user) {
+        const token = response.data.token
+        const userData = response.data.user
+
+        localStorage.setItem('da-cms-token', token)
+        setUser(userData)
+        setIsAuthenticated(true)
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('Login error:', error)
+      return false
+    }
   }
 
   const logout = () => {
     setIsAuthenticated(false)
-    localStorage.removeItem('da-cms-auth')
+    setUser(null)
+    localStorage.removeItem('da-cms-token')
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   )
