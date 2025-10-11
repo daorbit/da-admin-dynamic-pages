@@ -48,7 +48,7 @@ const pageSchema = yup.object({
     .string()
     .required("Thumbnail URL is required")
     .url("Must be a valid URL"),
-  audioUrl: yup.string().optional().url("Must be a valid URL"),
+  audioUrl: yup.string().optional(),
   groups: yup
     .array()
     .of(yup.string().required())
@@ -60,7 +60,7 @@ const pageSchema = yup.object({
     .required("Editor type is required")
     .oneOf(
       ["summernote", "quill"] as const,
-      "Editor type must be markdown, summernote, or quill"
+      "Editor type must be summernote or quill"
     ),
   slug: yup
     .string()
@@ -194,7 +194,6 @@ const PageForm: React.FC = () => {
         await dispatch(createPage(finalData));
       }
 
-      navigate("/pages");
     } catch (err) {
       console.error("Error saving page:", err);
       setError(isEditing ? "Failed to update page" : "Failed to create page");
