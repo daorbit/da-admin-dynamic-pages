@@ -234,7 +234,7 @@ const PlaylistDetail: React.FC = () => {
               </ListItemAvatar>
               <ListItemText
                 primary={
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  <Typography variant="h6" sx={{ fontWeight: 400 ,fontSize: '16px'}}>
                     {track.title || 'Untitled'}
                   </Typography>
                 }
@@ -253,6 +253,7 @@ const PlaylistDetail: React.FC = () => {
                     )}
                   </Box>
                 }
+                sx={{marginLeft:"15px"}}
               />
               <IconButton
                 onClick={() => handlePlayTrack(index)}
