@@ -64,7 +64,6 @@ const TrackForm: React.FC = () => {
     formState: { errors },
     reset,
     setValue,
-    watch,
   } = useForm<CreateTrackData>({
     resolver: yupResolver(trackSchema),
     defaultValues: {
@@ -484,7 +483,6 @@ const TrackForm: React.FC = () => {
         open={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
         onSelectImage={handleImageSelect}
-        currentImage={watch('thumbnail')}
       />
     </Box>
   );

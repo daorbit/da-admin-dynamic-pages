@@ -429,7 +429,6 @@ const PlaylistForm: React.FC = () => {
         open={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
         onSelectImage={handleImageSelect}
-        currentImage={watch('thumbnail')}
       />
     </Box>
   );

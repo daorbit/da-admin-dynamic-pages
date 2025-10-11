@@ -738,14 +738,12 @@ const PageForm: React.FC = () => {
         open={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
         onSelectImage={handleImageSelect}
-        currentImage={watch('imageUrl')}
       />
 
       <ImageDialog
         open={thumbnailDialogOpen}
         onClose={() => setThumbnailDialogOpen(false)}
         onSelectImage={handleThumbnailSelect}
-        currentImage={watch('thumbnailUrl')}
       />
     </Box>
   );
