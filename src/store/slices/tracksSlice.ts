@@ -16,6 +16,13 @@ interface TracksState {
   categoryFilter: string
   authorFilter: string
   lastFetched: number | null // timestamp for caching
+  lastFetchParams: {
+    page?: number
+    pageSize?: number
+    search?: string
+    category?: string
+    author?: string
+  } | null
 }
 
 const initialState: TracksState = {
@@ -32,6 +39,7 @@ const initialState: TracksState = {
   categoryFilter: '',
   authorFilter: '',
   lastFetched: null,
+  lastFetchParams: null,
 }
 
 // Async thunks
@@ -126,6 +134,7 @@ const tracksSlice = createSlice({
         state.categoryFilter = action.payload.categoryFilter || ''
         state.authorFilter = action.payload.authorFilter || ''
         state.lastFetched = Date.now()
+        state.lastFetchParams = action.meta.arg
       })
       .addCase(fetchTracks.rejected, (state, action) => {
         state.loading = false

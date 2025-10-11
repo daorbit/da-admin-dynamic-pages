@@ -56,6 +56,7 @@ const PlaylistList: React.FC = () => {
     isPublicFilter,
     tagFilter,
     lastFetched,
+    lastFetchParams,
   } = useAppSelector((state) => state.playlists);
 
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
@@ -87,10 +88,26 @@ const PlaylistList: React.FC = () => {
   useEffect(() => {
     // Only fetch if we haven't fetched recently or if pagination/filters changed
     const CACHE_DURATION = 2 * 60 * 1000; // 2 minutes for playlists list
-    const shouldFetch =
-      !lastFetched || Date.now() - lastFetched > CACHE_DURATION;
+    const currentParams = {
+      page: pagination.page,
+      pageSize: pagination.pageSize,
+      search: searchTerm,
+      createdBy: createdByFilter,
+      isPublic: isPublicFilter ? isPublicFilter === 'true' : undefined,
+      tag: tagFilter,
+    };
 
-    if (shouldFetch || pagination.page !== 1 || pagination.pageSize !== 10) {
+    const paramsChanged = !lastFetchParams ||
+      currentParams.page !== lastFetchParams.page ||
+      currentParams.pageSize !== lastFetchParams.pageSize ||
+      currentParams.search !== lastFetchParams.search ||
+      currentParams.createdBy !== lastFetchParams.createdBy ||
+      currentParams.isPublic !== lastFetchParams.isPublic ||
+      currentParams.tag !== lastFetchParams.tag;
+
+    const shouldFetch = !lastFetched || Date.now() - lastFetched > CACHE_DURATION || paramsChanged;
+
+    if (shouldFetch) {
       dispatch(
         fetchPlaylists({
           page: pagination.page,
@@ -102,7 +119,7 @@ const PlaylistList: React.FC = () => {
         })
       );
     }
-  }, [dispatch, pagination.page, pagination.pageSize, searchTerm, createdByFilter, isPublicFilter, tagFilter, lastFetched]);
+  }, [dispatch, pagination.page, pagination.pageSize, searchTerm, createdByFilter, isPublicFilter, tagFilter, lastFetched, lastFetchParams]);
 
   const handleSearch = () => {
     dispatch(setSearchTerm(localSearchTerm));

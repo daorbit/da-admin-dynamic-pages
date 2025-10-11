@@ -11,6 +11,7 @@ import TrackList from './pages/TrackList'
 import TrackForm from './pages/TrackForm'
 import PlaylistList from './pages/PlaylistList'
 import PlaylistForm from './pages/PlaylistForm'
+import PlaylistDetail from './pages/PlaylistDetail'
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
                 <Route path="/tracks/:id/edit" element={<TrackForm />} />
                 <Route path="/playlists" element={<PlaylistList />} />
                 <Route path="/playlists/new" element={<PlaylistForm />} />
+                <Route path="/playlists/:id" element={<PlaylistDetail />} />
                 <Route path="/playlists/:id/edit" element={<PlaylistForm />} />
               </Routes>
             </Layout>

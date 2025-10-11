@@ -17,6 +17,14 @@ interface PlaylistsState {
   isPublicFilter: string
   tagFilter: string
   lastFetched: number | null // timestamp for caching
+  lastFetchParams: {
+    page?: number
+    pageSize?: number
+    search?: string
+    createdBy?: string
+    isPublic?: boolean
+    tag?: string
+  } | null
 }
 
 const initialState: PlaylistsState = {
@@ -34,6 +42,7 @@ const initialState: PlaylistsState = {
   isPublicFilter: '',
   tagFilter: '',
   lastFetched: null,
+  lastFetchParams: null,
 }
 
 // Async thunks
@@ -151,6 +160,7 @@ const playlistsSlice = createSlice({
         state.isPublicFilter = action.payload.isPublicFilter || ''
         state.tagFilter = action.payload.tagFilter || ''
         state.lastFetched = Date.now()
+        state.lastFetchParams = action.meta.arg
       })
       .addCase(fetchPlaylists.rejected, (state, action) => {
         state.loading = false
