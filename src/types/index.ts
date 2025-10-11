@@ -24,6 +24,7 @@ export interface Track {
   thumbnail?: string;
   category?: string;
   audioUrl?: string;
+  playlists?: string[];
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +71,7 @@ export interface CreateTrackData {
   thumbnail?: string;
   category?: string;
   audioUrl?: string;
+  playlistId?: string;
 }
 
 export interface UpdateTrackData extends CreateTrackData {

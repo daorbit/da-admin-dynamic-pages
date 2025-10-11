@@ -11,11 +11,12 @@ import {
   CircularProgress,
   Alert,
   Grid,
+  MenuItem,
 } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { createTrack, updateTrack } from "../store/slices/tracksSlice";
-import { tracksAPI } from "../services/api";
-import type { CreateTrackData } from "../types";
+import { tracksAPI, playlistsAPI } from "../services/api";
+import type { CreateTrackData, Playlist } from "../types";
 
 const trackSchema = yup.object({
   title: yup
@@ -39,6 +40,7 @@ const trackSchema = yup.object({
     .optional()
     .max(50, "Category cannot be more than 50 characters"),
   audioUrl: yup.string().optional().url("Must be a valid URL"),
+  playlistId: yup.string().optional(),
 });
 
 const TrackForm: React.FC = () => {
@@ -50,6 +52,7 @@ const TrackForm: React.FC = () => {
 
   const [loadingTrack, setLoadingTrack] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
 
   const {
     control,
@@ -68,6 +71,7 @@ const TrackForm: React.FC = () => {
       thumbnail: "",
       category: "",
       audioUrl: "",
+      playlistId: "",
     },
   });
 
@@ -87,6 +91,7 @@ const TrackForm: React.FC = () => {
             thumbnail: response.data.thumbnail || "",
             category: response.data.category || "",
             audioUrl: response.data.audioUrl || "",
+            playlistId: response.data.playlists?.[0] || "",
           });
         })
         .catch((err) => {
@@ -99,12 +104,37 @@ const TrackForm: React.FC = () => {
     }
   }, [id, isEditing, reset]);
 
+  useEffect(() => {
+    const fetchPlaylists = async () => {
+      try {
+        const response = await playlistsAPI.getAll({ limit: 100 });
+        console.log('Playlists response:', JSON.stringify(response, null, 2));
+        setPlaylists(response.data.playlists || (response.data as any).data?.playlists || []);
+        console.log('Playlists set:', response.data.playlists || (response.data as any).data?.playlists || []);
+      } catch (err) {
+        console.error("Error loading playlists:", err);
+      }
+    };
+
+    fetchPlaylists();
+  }, []);
+
   const onSubmit = async (data: CreateTrackData) => {
     try {
+      let track;
       if (isEditing && id) {
-        await dispatch(updateTrack({ id, trackData: data })).unwrap();
+        track = await dispatch(updateTrack({ id, trackData: data })).unwrap();
       } else {
-        await dispatch(createTrack(data)).unwrap();
+        track = await dispatch(createTrack(data)).unwrap();
+        
+        // Add track to selected playlist
+        if (data.playlistId) {
+          try {
+            await playlistsAPI.addTracks(data.playlistId, [track._id]);
+          } catch (err) {
+            console.error(`Error adding track to playlist ${data.playlistId}:`, err);
+          }
+        }
       }
       navigate("/tracks");
     } catch (err) {
@@ -344,6 +374,37 @@ const TrackForm: React.FC = () => {
                       },
                     }}
                   />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
+                Playlists (Optional)
+              </Typography>
+              <Controller
+                name="playlistId"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    select
+                    fullWidth
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        borderRadius: "8px",
+                      },
+                    }}
+                  >
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {playlists.map((playlist) => (
+                      <MenuItem key={playlist._id} value={playlist._id}>
+                        {playlist.title || "Untitled Playlist"}
+                      </MenuItem>
+                    ))}
+                  </TextField>
                 )}
               />
             </Grid>
