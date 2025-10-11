@@ -79,22 +79,22 @@ const Dashboard: React.FC = () => {
 
       <Grid container spacing={4} sx={{ mb: 6, mt: 2 }}>
         {stats.map((stat, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Grid item xs={12} sm={6} md={3} key={index}>
             <Card
               sx={{
-                color: "#777777",
+                color: stat.color,
                 borderRadius: 2,
                 border: `2px solid ${stat.color}`,
                 boxShadow: "none",
               }}
             >
-              <CardContent sx={{ display: "flex", alignItems: "center", p: 3 }}>
-                <stat.icon size={40} />
-                <Box sx={{ ml: 3 }}>
-                  <Typography variant="h6" gutterBottom>
+              <CardContent sx={{ display: "flex", alignItems: "center", p: 2 }}>
+                <stat.icon size={24} />
+                <Box sx={{ ml: 2 }}>
+                  <Typography variant="body2" gutterBottom>
                     {stat.title}
                   </Typography>
-                  <Typography variant="h4">{stat.value}</Typography>
+                  <Typography variant="h6">{stat.value}</Typography>
                 </Box>
               </CardContent>
             </Card>
