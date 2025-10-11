@@ -13,7 +13,7 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { Home, LayoutDashboard, FileText, LogOut, Music, ListMusic } from "lucide-react";
+import { Home, LayoutDashboard, FileText, LogOut, Music, ListMusic, Upload } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 interface LayoutProps {
@@ -130,6 +130,29 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <Box sx={{ mt: "auto" }}>
         <Divider />
         <List>
+          <ListItem disablePadding sx={{ mb: 2 }}>
+            <ListItemButton
+              component={Link}
+              to="/images"
+              selected={location.pathname === "/images"}
+              onClick={() => isMobile && setMobileOpen(false)}
+              sx={{
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                px: 1,
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: "auto",
+                  mr: isCollapsed ? 0 : 2,
+                  color: "#fff",
+                }}
+              >
+                <Upload />
+              </ListItemIcon>
+              {!isCollapsed && <ListItemText primary="Images" />}
+            </ListItemButton>
+          </ListItem>
           <ListItem disablePadding>
             <ListItemButton
               component="button"

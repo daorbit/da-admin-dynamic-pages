@@ -44,6 +44,12 @@ export interface Playlist {
   updatedAt: string;
 }
 
+export interface Image {
+  public_id: string;
+  secure_url: string;
+  created_at: string;
+}
+
 export interface CreatePageData {
   title: string;
   description: string;
