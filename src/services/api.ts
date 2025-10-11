@@ -217,14 +217,34 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
 }
 
 // Get uploaded images from Cloudinary
-export const getUploadedImages = async (): Promise<Array<{ public_id: string; secure_url: string; created_at: string }>> => {
+export const getUploadedImages = async (options?: { limit?: number; nextCursor?: string }): Promise<{
+  images: Array<{ public_id: string; secure_url: string; created_at: string }>;
+  nextCursor?: string;
+  hasMore: boolean;
+}> => {
   try {
-    const response: AxiosResponse<{ images: Array<{ public_id: string; secure_url: string; created_at: string }> }> = await api.get('/images')
-    return response.data.images
+    const params = new URLSearchParams();
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.nextCursor) params.append('next_cursor', options.nextCursor);
+
+    const queryString = params.toString();
+    const url = `/images${queryString ? `?${queryString}` : ''}`;
+
+    const response: AxiosResponse<{
+      images: Array<{ public_id: string; secure_url: string; created_at: string }>;
+      next_cursor?: string;
+      has_more: boolean;
+    }> = await api.get(url);
+
+    return {
+      images: response.data.images,
+      nextCursor: response.data.next_cursor,
+      hasMore: response.data.has_more
+    };
   } catch (error) {
     console.error('Failed to fetch uploaded images:', error)
     enqueueSnackbar('Failed to load uploaded images', { variant: 'error' })
-    return []
+    return { images: [], hasMore: false };
   }
 }
 

@@ -3,6 +3,7 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
+  Button,
   Box,
   Typography,
   Grid,
@@ -34,22 +35,49 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
 }) => {
   const [images, setImages] = useState<CloudinaryImage[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [nextCursor, setNextCursor] = useState<string | undefined>();
+  const [hasMore, setHasMore] = useState(false);
 
   useEffect(() => {
     if (open) {
-      loadImages();
+      loadImages(true);
+    } else {
+      // Reset state when dialog closes
+      setImages([]);
+      setNextCursor(undefined);
+      setHasMore(false);
     }
   }, [open]);
 
-  const loadImages = async () => {
-    setLoading(true);
+  const loadImages = async (reset = false) => {
+    if (reset) {
+      setLoading(true);
+      setImages([]);
+      setNextCursor(undefined);
+    } else {
+      setLoadingMore(true);
+    }
+
     try {
-      const uploadedImages = await getUploadedImages();
-      setImages(uploadedImages);
+      const result = await getUploadedImages({
+        limit: 10,
+        nextCursor: reset ? undefined : nextCursor
+      });
+
+      if (reset) {
+        setImages(result.images);
+      } else {
+        setImages(prev => [...prev, ...result.images]);
+      }
+
+      setNextCursor(result.nextCursor);
+      setHasMore(result.hasMore);
     } catch (error) {
       console.error('Failed to load images:', error);
     } finally {
       setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -101,6 +129,18 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
               </Grid>
             ))}
           </Grid>
+        )}
+
+        {hasMore && (
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
+            <Button
+              variant="outlined"
+              onClick={() => loadImages(false)}
+              disabled={loadingMore}
+            >
+              {loadingMore ? 'Loading...' : 'Load More Images'}
+            </Button>
+          </Box>
         )}
 
         {images.length === 0 && !loading && (

@@ -15,9 +15,10 @@ import {
 import {
   Delete as DeleteIcon,
   CloudUpload as CloudUploadIcon,
+  Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchImages, deleteImage } from "../store/slices/imagesSlice";
+import { fetchImages, loadMoreImages, deleteImage } from "../store/slices/imagesSlice";
 import { uploadToCloudinary } from "../services/api";
 
 const Images: React.FC = () => {
@@ -25,8 +26,11 @@ const Images: React.FC = () => {
   const {
     items: images,
     loading,
+    loadingMore,
     error,
     lastFetched,
+    hasMore,
+    nextCursor,
   } = useAppSelector((state) => state.images);
 
   const [uploadLoading, setUploadLoading] = useState(false);
@@ -174,6 +178,28 @@ const Images: React.FC = () => {
             </Grid>
           ))}
         </Grid>
+      )}
+
+      {hasMore && (
+        <IconButton
+          onClick={() => nextCursor && dispatch(loadMoreImages(nextCursor))}
+          disabled={loadingMore}
+          sx={{
+            position: 'fixed',
+            bottom: 24,
+            right: 24,
+            backgroundColor: 'primary.main',
+            color: 'white',
+            '&:hover': {
+              backgroundColor: 'primary.dark',
+            },
+            boxShadow: 3,
+            zIndex: 1000,
+          }}
+          size="large"
+        >
+          {loadingMore ? <CircularProgress size={24} color="inherit" /> : <RefreshIcon />}
+        </IconButton>
       )}
     </Box>
   );
