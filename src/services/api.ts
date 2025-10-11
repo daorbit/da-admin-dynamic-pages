@@ -15,8 +15,8 @@ import type {
 } from '../types'
 
 // Cloudinary configuration
-const CLOUDINARY_CLOUD_NAME = (import.meta as any).env?.CLOUDINARY_CLOUD_NAME || 'your-cloud-name'
-const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env?.CLOUDINARY_UPLOAD_PRESET || 'your-upload-preset'
+const CLOUDINARY_CLOUD_NAME = (import.meta as any).env?.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name'
+const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env?.VITE_CLOUDINARY_UPLOAD_PRESET || 'your-upload-preset'
 
 // Create axios instance with default config
 const api = axios.create({
