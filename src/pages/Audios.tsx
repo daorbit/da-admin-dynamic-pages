@@ -17,6 +17,7 @@ import {
   CloudUpload as CloudUploadIcon,
   Refresh as RefreshIcon,
   PlayArrow as PlayArrowIcon,
+  Pause as PauseIcon,
 } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
@@ -39,6 +40,7 @@ const Audios: React.FC = () => {
   } = useAppSelector((state) => state.audios);
 
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   useEffect(() => {
     const CACHE_DURATION = 5 * 60 * 1000;
@@ -49,6 +51,15 @@ const Audios: React.FC = () => {
       dispatch(fetchAudios());
     }
   }, [dispatch, lastFetched]);
+
+  useEffect(() => {
+    if (playingId) {
+      const audio = document.querySelector(`audio[data-id="${playingId}"]`) as HTMLAudioElement;
+      if (audio) audio.play();
+    } else {
+      document.querySelectorAll('audio').forEach(a => a.pause());
+    }
+  }, [playingId]);
 
   const handleDeleteAudio = (publicId: string) => {
     if (window.confirm("Are you sure you want to delete this audio?")) {
@@ -77,6 +88,14 @@ const Audios: React.FC = () => {
       } finally {
         setUploadLoading(false);
       }
+    }
+  };
+
+  const handlePlay = (id: string) => {
+    if (playingId === id) {
+      setPlayingId(null);
+    } else {
+      setPlayingId(id);
     }
   };
 
@@ -208,6 +227,7 @@ const Audios: React.FC = () => {
                   <DeleteIcon color="error" />
                 </IconButton>
                 <Box
+                  onClick={() => handlePlay(audio.public_id)}
                   sx={{
                     height: 200,
                     display: "flex",
@@ -215,10 +235,24 @@ const Audios: React.FC = () => {
                     justifyContent: "center",
                     backgroundColor: "#f5f5f5",
                     borderRadius: "8px 8px 0 0",
+                    cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: "#e0e0e0",
+                    },
                   }}
                 >
-                  <PlayArrowIcon sx={{ fontSize: 48, color: "#666" }} />
+                  {playingId === audio.public_id ? (
+                    <PauseIcon sx={{ fontSize: 48, color: "#666" }} />
+                  ) : (
+                    <PlayArrowIcon sx={{ fontSize: 48, color: "#666" }} />
+                  )}
                 </Box>
+                <audio
+                  src={audio.secure_url}
+                  data-id={audio.public_id}
+                  onEnded={() => setPlayingId(null)}
+                  style={{ display: 'none' }}
+                />
                 <CardContent sx={{ flexGrow: 1 }}>
                   <Typography variant="body2" color="text.secondary">
                     Uploaded: {new Date(audio.created_at).toLocaleDateString()}
@@ -238,29 +272,23 @@ const Audios: React.FC = () => {
       )}
 
       {hasMore && (
-        <IconButton
-          onClick={() => nextCursor && dispatch(loadMoreAudios(nextCursor))}
-          disabled={loadingMore}
-          sx={{
-            position: "fixed",
-            bottom: 24,
-            right: 24,
-            backgroundColor: "primary.main",
-            color: "white",
-            "&:hover": {
-              backgroundColor: "primary.dark",
-            },
-            boxShadow: 3,
-            zIndex: 1000,
-          }}
-          size="large"
-        >
-          {loadingMore ? (
-            <CircularProgress size={24} color="inherit" />
-          ) : (
-            <RefreshIcon />
-          )}
-        </IconButton>
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <Button
+            onClick={() => nextCursor && dispatch(loadMoreAudios(nextCursor))}
+            disabled={loadingMore}
+            variant="contained"
+            startIcon={
+              loadingMore ? (
+                <CircularProgress size={16} />
+              ) : (
+                <RefreshIcon />
+              )
+            }
+            sx={{ borderRadius: "8px", boxShadow: "none" }}
+          >
+            {loadingMore ? "Loading..." : "Load More"}
+          </Button>
+        </Box>
       )}
     </Box>
   );

@@ -223,35 +223,36 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
 
 // Cloudinary upload function for audio
 export const uploadAudioToCloudinary = async (file: File): Promise<string> => {
-  const formData = new FormData()
-  formData.append('file', file)
-  formData.append('upload_preset', CLOUDINARY_AUDIO_UPLOAD_PRESET)
-  formData.append('cloud_name', CLOUDINARY_CLOUD_NAME)
-  formData.append('folder', 'da-orbit-audio')
+  const formData = new FormData();
+
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_AUDIO_UPLOAD_PRESET);
+  formData.append('folder', 'da-orbit-audio'); // 👈 ensure uploaded to this folder
 
   try {
+    // ✅ Audio files must use the `video/upload` endpoint
     const response = await axios.post(
       `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
       formData,
       {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers: { 'Content-Type': 'multipart/form-data' },
       }
-    )
+    );
 
-    if (response.data.secure_url) {
-      enqueueSnackbar('Audio uploaded successfully!', { variant: 'success' })
-      return response.data.secure_url
-    } else {
-      throw new Error('Upload failed - no URL returned')
+    const { secure_url } = response.data;
+
+    if (secure_url) {
+      enqueueSnackbar('🎧 Audio uploaded successfully!', { variant: 'success' });
+      return secure_url;
     }
-  } catch (error) {
-    console.error('Cloudinary audio upload error:', error)
-    enqueueSnackbar('Failed to upload audio', { variant: 'error' })
-    throw error
+
+    throw new Error('Upload failed — no secure URL returned from Cloudinary.');
+  } catch (error: any) {
+    console.error('❌ Cloudinary audio upload error:', error.response?.data || error.message);
+    enqueueSnackbar('Failed to upload audio', { variant: 'error' });
+    throw error;
   }
-}
+};
 
 // Get uploaded images from Cloudinary
 export const getUploadedImages = async (options?: { limit?: number; nextCursor?: string }): Promise<{
