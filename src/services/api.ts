@@ -301,7 +301,7 @@ export const deleteUploadedImage = async (publicId: string): Promise<{ publicId:
 
 // Get uploaded audios from Cloudinary
 export const getUploadedAudios = async (options?: { limit?: number; nextCursor?: string }): Promise<{
-  audios: Array<{ public_id: string; secure_url: string; created_at: string }>;
+  audios: Array<{ public_id: string; secure_url: string; created_at: string; name?: string }>;
   nextCursor?: string;
   hasMore: boolean;
 }> => {
@@ -314,7 +314,7 @@ export const getUploadedAudios = async (options?: { limit?: number; nextCursor?:
     const url = `/audios${queryString ? `?${queryString}` : ''}`;
 
     const response: AxiosResponse<{
-      audios: Array<{ public_id: string; secure_url: string; created_at: string }>;
+      audios: Array<{ public_id: string; secure_url: string; created_at: string; name?: string }>;
       next_cursor?: string;
       has_more: boolean;
     }> = await api.get(url);
@@ -340,6 +340,19 @@ export const deleteUploadedAudio = async (publicId: string): Promise<{ publicId:
   } catch (error) {
     console.error('Failed to delete uploaded audio:', error)
     enqueueSnackbar('Failed to delete audio', { variant: 'error' })
+    throw error
+  }
+}
+
+// Update audio name
+export const updateAudioName = async (publicId: string, name: string): Promise<{ publicId: string; name: string }> => {
+  try {
+    const response: AxiosResponse<{ message: string; publicId: string; name: string }> = await api.put(`/audios/${publicId}`, { name })
+    enqueueSnackbar('Audio name updated successfully!', { variant: 'success' })
+    return response.data
+  } catch (error) {
+    console.error('Failed to update audio name:', error)
+    enqueueSnackbar('Failed to update audio name', { variant: 'error' })
     throw error
   }
 }

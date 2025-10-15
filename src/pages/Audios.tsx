@@ -10,19 +10,22 @@ import {
   Button,
   Input,
   Skeleton,
+  TextField,
+  IconButton,
 } from "@mui/material";
 import {
   CloudUpload as CloudUploadIcon,
   Refresh as RefreshIcon,
   PlayArrow as PlayArrowIcon,
   Pause as PauseIcon,
+  Edit as EditIcon,
 } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchAudios,
   loadMoreAudios,
 } from "../store/slices/audiosSlice";
-import { uploadAudioToCloudinary } from "../services/api";
+import { uploadAudioToCloudinary, updateAudioName } from "../services/api";
 
 const Audios: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -38,6 +41,8 @@ const Audios: React.FC = () => {
 
   const [uploadLoading, setUploadLoading] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingName, setEditingName] = useState("");
 
   useEffect(() => {
     const CACHE_DURATION = 5 * 60 * 1000;
@@ -87,6 +92,30 @@ const Audios: React.FC = () => {
     } else {
       setPlayingId(id);
     }
+  };
+
+  const handleEdit = (audio: any) => {
+    setEditingId(audio.public_id);
+    setEditingName(audio.name || audio.public_id.split('/').pop() || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingId || !editingName.trim()) return;
+
+    try {
+      await updateAudioName(editingId, editingName.trim());
+      setEditingId(null);
+      setEditingName("");
+      // Refresh the list
+      dispatch(fetchAudios());
+    } catch (error) {
+      console.error("Failed to update audio name:", error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditingName("");
   };
 
   if (loading) {
@@ -229,16 +258,56 @@ const Audios: React.FC = () => {
                   style={{ display: 'none' }}
                 />
                 <CardContent sx={{ flexGrow: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    Uploaded: {new Date(audio.created_at).toLocaleDateString()}
-                  </Typography>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ mt: 1 }}
-                  >
-                    {audio.public_id}
-                  </Typography>
+                  {editingId === audio.public_id ? (
+                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                      <TextField
+                        size="small"
+                        value={editingName}
+                        onChange={(e) => setEditingName(e.target.value)}
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') handleSaveEdit();
+                          if (e.key === 'Escape') handleCancelEdit();
+                        }}
+                        autoFocus
+                        fullWidth
+                      />
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        <Button size="small" onClick={handleSaveEdit} variant="contained">
+                          Save
+                        </Button>
+                        <Button size="small" onClick={handleCancelEdit}>
+                          Cancel
+                        </Button>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+                            {audio.name || audio.public_id.split('/').pop()}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            Uploaded: {new Date(audio.created_at).toLocaleDateString()}
+                          </Typography>
+                        </Box>
+                        <IconButton
+                          size="small"
+                          onClick={() => handleEdit(audio)}
+                          sx={{ ml: 1 }}
+                        >
+                          <EditIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{ mt: 1 }}
+                      >
+                        {audio.public_id}
+                      </Typography>
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </Grid>

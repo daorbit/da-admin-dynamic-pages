@@ -54,6 +54,7 @@ export interface Audio {
   public_id: string;
   secure_url: string;
   created_at: string;
+  name?: string;
 }
 
 export interface CreatePageData {
