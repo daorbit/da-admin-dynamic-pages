@@ -201,6 +201,7 @@ const Images: React.FC = () => {
                     "&:hover": {
                       backgroundColor: "rgba(255, 255, 255, 0.9)",
                     },
+                    display: "none", // Hidden for now
                   }}
                   size="small"
                 >
