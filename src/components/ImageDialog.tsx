@@ -12,9 +12,11 @@ import {
   CardActionArea,
   CircularProgress,
   IconButton,
+  Input,
+  Skeleton,
 } from '@mui/material';
-import { Close } from '@mui/icons-material';
-import { getUploadedImages } from '../services/api';
+import { Close, CloudUpload as CloudUploadIcon } from '@mui/icons-material';
+import { getUploadedImages, uploadToCloudinary } from '../services/api';
 
 interface ImageDialogProps {
   open: boolean;
@@ -38,6 +40,7 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
   const [loadingMore, setLoadingMore] = useState(false);
   const [nextCursor, setNextCursor] = useState<string | undefined>();
   const [hasMore, setHasMore] = useState(false);
+  const [uploadLoading, setUploadLoading] = useState(false);
 
   useEffect(() => {
     if (open) {
@@ -86,6 +89,25 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
     onClose();
   };
 
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadLoading(true);
+      try {
+        await uploadToCloudinary(file);
+        // Reset file input
+        const fileInput = document.getElementById("modal-image-upload") as HTMLInputElement;
+        if (fileInput) fileInput.value = "";
+        // Refresh images list
+        loadImages(true);
+      } catch (error) {
+        console.error("Upload failed:", error);
+      } finally {
+        setUploadLoading(false);
+      }
+    }
+  };
+
   const handleClose = () => {
     onClose();
   };
@@ -101,16 +123,19 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
         </Box>
       </DialogTitle>
 
-      <DialogContent>
-      
+      <DialogContent sx={{ maxHeight: '70vh', overflow: 'auto' }}>
         <Typography variant="subtitle1" sx={{ mb: 2 }}>
           Select from uploaded images:
         </Typography>
 
         {loading ? (
-          <Box display="flex" justifyContent="center" sx={{ py: 4 }}>
-            <CircularProgress />
-          </Box>
+          <Grid container spacing={2}>
+            {Array.from({ length: 8 }).map((_, index) => (
+              <Grid item xs={6} sm={4} md={3} key={index}>
+                <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1 }} />
+              </Grid>
+            ))}
+          </Grid>
         ) : (
           <Grid container spacing={2}>
             {images.map((image) => (
@@ -131,24 +156,42 @@ const ImageDialog: React.FC<ImageDialogProps> = ({
           </Grid>
         )}
 
-        {hasMore && (
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'center' }}>
-            <Button
-              variant="outlined"
-              onClick={() => loadImages(false)}
-              disabled={loadingMore}
-            >
-              {loadingMore ? 'Loading...' : 'Load More Images'}
-            </Button>
-          </Box>
-        )}
-
         {images.length === 0 && !loading && (
           <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
             No images uploaded yet.
           </Typography>
         )}
       </DialogContent>
+
+      <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider', display: 'flex', gap: 2, alignItems: 'center', justifyContent: 'space-between' }}>
+        <Input
+          type="file"
+          inputProps={{ accept: "image/*" }}
+          id="modal-image-upload"
+          onChange={handleFileSelect}
+          sx={{ display: "none" }}
+        />
+        <Button
+          variant="outlined"
+          component="label"
+          htmlFor="modal-image-upload"
+          startIcon={uploadLoading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+          sx={{ borderRadius: "8px" }}
+        >
+          {uploadLoading ? "Uploading..." : "Upload New Image"}
+        </Button>
+
+        {hasMore && (
+          <Button
+            variant="contained"
+            onClick={() => loadImages(false)}
+            disabled={loadingMore}
+            sx={{ borderRadius: "8px" }}
+          >
+            {loadingMore ? 'Loading...' : 'Load More Images'}
+          </Button>
+        )}
+      </Box>
     </Dialog>
   );
 };
