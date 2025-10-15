@@ -103,12 +103,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <ListItemButton
                   component={Link}
                   to={item.href}
-                  selected={item.current}
                   onClick={() => isMobile && setMobileOpen(false)}
                   sx={{
                     justifyContent: isCollapsed ? "center" : "flex-start",
                     px: 1,
                     mt: 2,
+                    backgroundColor: item.current ? "#5a55d8" : "transparent",
+                    "&:hover": {
+                      backgroundColor: item.current ? "#5a55d8" : "rgba(255, 255, 255, 0.1)",
+                    },
                   }}
                 >
                   <ListItemIcon
@@ -134,11 +137,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <ListItemButton
               component={Link}
               to="/images"
-              selected={location.pathname === "/images"}
               onClick={() => isMobile && setMobileOpen(false)}
               sx={{
                 justifyContent: isCollapsed ? "center" : "flex-start",
                 px: 1,
+                backgroundColor: location.pathname === "/images" ? "#5a55d8" : "transparent",
+                "&:hover": {
+                  backgroundColor: location.pathname === "/images" ? "#5a55d8" : "rgba(255, 255, 255, 0.1)",
+                },
               }}
             >
               <ListItemIcon
