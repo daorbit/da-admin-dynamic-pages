@@ -74,13 +74,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: ListMusic,
       current: location.pathname === "/playlists",
     },
-
-    {
-      name: "Audios",
-      href: "/audios",
-      icon: AudioLines,
-      current: location.pathname === "/audios",
-    },
   ];
 
   const isCollapsed = !isMobile;
@@ -179,6 +172,36 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Upload />
               </ListItemIcon>
               {!isCollapsed && <ListItemText primary="Images" />}
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding sx={{ mb: 2 }}>
+            <ListItemButton
+              component={Link}
+              to="/audios"
+              onClick={() => isMobile && setMobileOpen(false)}
+              sx={{
+                justifyContent: isCollapsed ? "center" : "flex-start",
+                px: 1,
+                backgroundColor:
+                  location.pathname === "/audios" ? "#5a55d8" : "transparent",
+                "&:hover": {
+                  backgroundColor:
+                    location.pathname === "/audios"
+                      ? "#5a55d8"
+                      : "rgba(255, 255, 255, 0.1)",
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  minWidth: "auto",
+                  mr: isCollapsed ? 0 : 2,
+                  color: "#fff",
+                }}
+              >
+                <AudioLines />
+              </ListItemIcon>
+              {!isCollapsed && <ListItemText primary="Audios" />}
             </ListItemButton>
           </ListItem>
           <ListItem disablePadding>

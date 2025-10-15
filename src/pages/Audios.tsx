@@ -7,13 +7,11 @@ import {
   CardContent,
   CircularProgress,
   Alert,
-  IconButton,
   Button,
   Input,
   Skeleton,
 } from "@mui/material";
 import {
-  Delete as DeleteIcon,
   CloudUpload as CloudUploadIcon,
   Refresh as RefreshIcon,
   PlayArrow as PlayArrowIcon,
@@ -23,7 +21,6 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchAudios,
   loadMoreAudios,
-  removeAudioLocally,
 } from "../store/slices/audiosSlice";
 import { uploadAudioToCloudinary } from "../services/api";
 
@@ -60,13 +57,6 @@ const Audios: React.FC = () => {
       document.querySelectorAll('audio').forEach(a => a.pause());
     }
   }, [playingId]);
-
-  const handleDeleteAudio = (publicId: string) => {
-    if (window.confirm("Are you sure you want to delete this audio?")) {
-      // Remove from UI immediately (client-side only)
-      dispatch(removeAudioLocally(publicId));
-    }
-  };
 
   const handleFileSelect = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -211,21 +201,6 @@ const Audios: React.FC = () => {
                   borderRadius: "8px",
                 }}
               >
-                <IconButton
-                  onClick={() => handleDeleteAudio(audio.public_id)}
-                  sx={{
-                    position: "absolute",
-                    top: 8,
-                    right: 8,
-                    backgroundColor: "rgba(255, 255, 255, 0.8)",
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                    },
-                  }}
-                  size="small"
-                >
-                  <DeleteIcon color="error" />
-                </IconButton>
                 <Box
                   onClick={() => handlePlay(audio.public_id)}
                   sx={{
