@@ -381,7 +381,7 @@ const PlaylistList: React.FC = () => {
       {/* Data Grid */}
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={filteredPlaylists}
+          rows={loading ? [] : filteredPlaylists}
           columns={columns}
           getRowId={(row) => row._id}
           loading={loading}

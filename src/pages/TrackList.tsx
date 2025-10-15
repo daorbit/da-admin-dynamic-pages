@@ -220,37 +220,37 @@ const TrackList: React.FC = () => {
         </Typography>
       ),
     },
-    {
-      field: 'playlists',
-      headerName: 'Playlists',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => {
-        const playlists = params.value as any[] || [];
-        if (playlists.length === 0) {
-          return <Typography variant="body2" color="text.secondary">None</Typography>;
-        }
-        return (
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-            {playlists.slice(0, 2).map((playlist: any) => (
-              <Chip
-                key={playlist._id}
-                label={playlist.title || 'Untitled'}
-                size="small"
-                variant="outlined"
-              />
-            ))}
-            {playlists.length > 2 && (
-              <Chip
-                label={`+${playlists.length - 2} more`}
-                size="small"
-                variant="outlined"
-              />
-            )}
-          </Box>
-        );
-      },
-    },
+    // {
+    //   field: 'playlists',
+    //   headerName: 'Playlists',
+    //   flex: 1,
+    //   minWidth: 150,
+    //   renderCell: (params) => {
+    //     const playlists = params.value as any[] || [];
+    //     if (playlists.length === 0) {
+    //       return <Typography variant="body2" color="text.secondary">None</Typography>;
+    //     }
+    //     return (
+    //       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+    //         {playlists.slice(0, 2).map((playlist: any) => (
+    //           <Chip
+    //             key={playlist._id}
+    //             label={playlist.title || 'Untitled'}
+    //             size="small"
+    //             variant="outlined"
+    //           />
+    //         ))}
+    //         {playlists.length > 2 && (
+    //           <Chip
+    //             label={`+${playlists.length - 2} more`}
+    //             size="small"
+    //             variant="outlined"
+    //           />
+    //         )}
+    //       </Box>
+    //     );
+    //   },
+    // },
     {
       field: 'createdAt',
       headerName: 'Created',
@@ -404,7 +404,7 @@ const TrackList: React.FC = () => {
       {/* Data Grid */}
       <Box sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={filteredTracks}
+          rows={loading ? [] : filteredTracks}
           columns={columns}
           getRowId={(row) => row._id}
           loading={loading}

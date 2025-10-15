@@ -363,7 +363,7 @@ const PageList: React.FC = () => {
 
       <Box sx={{ height: 600, width: "100%" }}>
         <DataGrid
-          rows={filteredPages}
+          rows={loading ? [] : filteredPages}
           columns={columns}
           getRowId={(row) => row._id}
           paginationModel={{
