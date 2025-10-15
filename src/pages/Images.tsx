@@ -11,6 +11,7 @@ import {
   IconButton,
   Button,
   Input,
+  Skeleton,
 } from "@mui/material";
 import {
   Delete as DeleteIcon,
@@ -18,7 +19,11 @@ import {
   Refresh as RefreshIcon,
 } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchImages, loadMoreImages, deleteImage } from "../store/slices/imagesSlice";
+import {
+  fetchImages,
+  loadMoreImages,
+  deleteImage,
+} from "../store/slices/imagesSlice";
 import { uploadToCloudinary } from "../services/api";
 
 const Images: React.FC = () => {
@@ -51,14 +56,18 @@ const Images: React.FC = () => {
     }
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0];
     if (file) {
       setUploadLoading(true);
       try {
         await uploadToCloudinary(file);
         // Reset file input
-        const fileInput = document.getElementById("image-upload") as HTMLInputElement;
+        const fileInput = document.getElementById(
+          "image-upload"
+        ) as HTMLInputElement;
         if (fileInput) fileInput.value = "";
         // Refresh images list
         dispatch(fetchImages());
@@ -72,13 +81,49 @@ const Images: React.FC = () => {
 
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="400px"
-      >
-        <CircularProgress />
+      <Box sx={{ flexGrow: 1 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", mb: 3 }}>
+          <Typography variant="h6" component="h1" gutterBottom>
+            Uploaded Images
+          </Typography>
+          <Skeleton
+            variant="rectangular"
+            width={140}
+            height={36}
+            sx={{ borderRadius: "8px" }}
+          />
+        </Box>
+        <Grid container spacing={3} sx={{ mt: 2 }}>
+          {Array.from({ length: 8 }).map((_, index) => (
+            <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
+              <Card
+                sx={{
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  boxShadow: "none",
+                  border: "1px solid #e0e0e0",
+                  borderRadius: "8px",
+                }}
+              >
+                <Skeleton
+                  variant="rectangular"
+                  height={200}
+                  sx={{ borderRadius: "8px 8px 0 0" }}
+                />
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Skeleton
+                    variant="text"
+                    width="60%"
+                    height={20}
+                    sx={{ mb: 1 }}
+                  />
+                  <Skeleton variant="text" width="80%" height={16} />
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
       </Box>
     );
   }
@@ -110,9 +155,15 @@ const Images: React.FC = () => {
             variant="contained"
             component="label"
             htmlFor="image-upload"
-            startIcon={uploadLoading ? <CircularProgress size={16} /> : <CloudUploadIcon />}
+            startIcon={
+              uploadLoading ? (
+                <CircularProgress size={16} />
+              ) : (
+                <CloudUploadIcon />
+              )
+            }
             disabled={uploadLoading}
-            sx={{borderRadius:"8px",boxShadow:"none"}}
+            sx={{ borderRadius: "8px", boxShadow: "none" }}
           >
             {uploadLoading ? "Uploading..." : "Upload Image"}
           </Button>
@@ -185,20 +236,24 @@ const Images: React.FC = () => {
           onClick={() => nextCursor && dispatch(loadMoreImages(nextCursor))}
           disabled={loadingMore}
           sx={{
-            position: 'fixed',
+            position: "fixed",
             bottom: 24,
             right: 24,
-            backgroundColor: 'primary.main',
-            color: 'white',
-            '&:hover': {
-              backgroundColor: 'primary.dark',
+            backgroundColor: "primary.main",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "primary.dark",
             },
             boxShadow: 3,
             zIndex: 1000,
           }}
           size="large"
         >
-          {loadingMore ? <CircularProgress size={24} color="inherit" /> : <RefreshIcon />}
+          {loadingMore ? (
+            <CircularProgress size={24} color="inherit" />
+          ) : (
+            <RefreshIcon />
+          )}
         </IconButton>
       )}
     </Box>
