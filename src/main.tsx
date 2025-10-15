@@ -2,11 +2,12 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
 import CssBaseline from '@mui/material/CssBaseline'
-import { SnackbarProvider } from 'notistack'
+import { ToastContainer } from 'react-toastify'
 import { Provider } from 'react-redux'
 import { store } from './store'
 import App from './App'
 import './index.css'
+import 'react-toastify/dist/ReactToastify.css'
 
 const theme = createTheme({
   palette: {
@@ -27,9 +28,19 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <SnackbarProvider maxSnack={3}>
-          <App />
-        </SnackbarProvider>
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        <App />
       </ThemeProvider>
     </Provider>
   </React.StrictMode>,

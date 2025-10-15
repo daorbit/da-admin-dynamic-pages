@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios'
-import { enqueueSnackbar } from 'notistack'
+import { toast } from 'react-toastify'
 import type { 
   Page, 
   CreatePageData, 
@@ -53,7 +53,7 @@ api.interceptors.response.use(
     
     // Don't show snackbar for 404 errors when fetching individual items
     if (error.response?.status !== 404) {
-      enqueueSnackbar(message, { variant: 'error' })
+      toast.error(message)
     }
     
     return Promise.reject(error)
@@ -83,21 +83,21 @@ export const pagesAPI = {
   // Create new page
   create: async (pageData: CreatePageData): Promise<ApiResponse<Page>> => {
     const response: AxiosResponse<ApiResponse<Page>> = await api.post('/pages', pageData)
-    enqueueSnackbar('Page created successfully!', { variant: 'success' })
+        toast.success('Page created successfully!')
     return response.data
   },
 
   // Update existing page
   update: async (id: string, pageData: UpdatePageData): Promise<ApiResponse<Page>> => {
     const response: AxiosResponse<ApiResponse<Page>> = await api.put(`/pages/${id}`, pageData)
-    enqueueSnackbar('Page updated successfully!', { variant: 'success' })
+    toast.success('Page updated successfully!')
     return response.data
   },
 
   // Delete page
   delete: async (id: string): Promise<ApiResponse<{ id: string; title: string }>> => {
     const response: AxiosResponse<ApiResponse<{ id: string; title: string }>> = await api.delete(`/pages/${id}`)
-    enqueueSnackbar('Page deleted successfully!', { variant: 'success' })
+    toast.success('Page deleted successfully!')
     return response.data
   },
 }
@@ -119,21 +119,21 @@ export const tracksAPI = {
   // Create new track
   create: async (trackData: CreateTrackData): Promise<ApiResponse<Track>> => {
     const response: AxiosResponse<ApiResponse<Track>> = await api.post('/tracks', trackData)
-    enqueueSnackbar('Track created successfully!', { variant: 'success' })
+    toast.success('Track created successfully!')
     return response.data
   },
 
   // Update existing track
   update: async (id: string, trackData: UpdateTrackData): Promise<ApiResponse<Track>> => {
     const response: AxiosResponse<ApiResponse<Track>> = await api.put(`/tracks/${id}`, trackData)
-    enqueueSnackbar('Track updated successfully!', { variant: 'success' })
+    toast.success('Track updated successfully!')
     return response.data
   },
 
   // Delete track
   delete: async (id: string): Promise<ApiResponse<{ id: string; title: string }>> => {
     const response: AxiosResponse<ApiResponse<{ id: string; title: string }>> = await api.delete(`/tracks/${id}`)
-    enqueueSnackbar('Track deleted successfully!', { variant: 'success' })
+    toast.success('Track deleted successfully!')
     return response.data
   },
 }
@@ -155,35 +155,35 @@ export const playlistsAPI = {
   // Create new playlist
   create: async (playlistData: CreatePlaylistData): Promise<ApiResponse<Playlist>> => {
     const response: AxiosResponse<ApiResponse<Playlist>> = await api.post('/playlists', playlistData)
-    enqueueSnackbar('Playlist created successfully!', { variant: 'success' })
+    toast.success('Playlist created successfully!')
     return response.data
   },
 
   // Update existing playlist
   update: async (id: string, playlistData: UpdatePlaylistData): Promise<ApiResponse<Playlist>> => {
     const response: AxiosResponse<ApiResponse<Playlist>> = await api.put(`/playlists/${id}`, playlistData)
-    enqueueSnackbar('Playlist updated successfully!', { variant: 'success' })
+    toast.success('Playlist updated successfully!')
     return response.data
   },
 
   // Delete playlist
   delete: async (id: string): Promise<ApiResponse<{ id: string; title: string }>> => {
     const response: AxiosResponse<ApiResponse<{ id: string; title: string }>> = await api.delete(`/playlists/${id}`)
-    enqueueSnackbar('Playlist deleted successfully!', { variant: 'success' })
+    toast.success('Playlist deleted successfully!')
     return response.data
   },
 
   // Add tracks to playlist
   addTracks: async (id: string, trackIds: string[]): Promise<ApiResponse<Playlist>> => {
     const response: AxiosResponse<ApiResponse<Playlist>> = await api.put(`/playlists/${id}/tracks`, { trackIds })
-    enqueueSnackbar('Tracks added to playlist successfully!', { variant: 'success' })
+    toast.success('Tracks added to playlist successfully!')
     return response.data
   },
 
   // Remove track from playlist
   removeTrack: async (id: string, trackId: string): Promise<ApiResponse<Playlist>> => {
     const response: AxiosResponse<ApiResponse<Playlist>> = await api.delete(`/playlists/${id}/tracks/${trackId}`)
-    enqueueSnackbar('Track removed from playlist successfully!', { variant: 'success' })
+    toast.success('Track removed from playlist successfully!')
     return response.data
   },
 }
@@ -209,14 +209,14 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
     )
 
     if (response.data.secure_url) {
-      enqueueSnackbar('Image uploaded successfully!', { variant: 'success' })
+      toast.success('Image uploaded successfully!')
       return response.data.secure_url
     } else {
       throw new Error('Upload failed - no URL returned')
     }
   } catch (error) {
     console.error('Cloudinary upload error:', error)
-    enqueueSnackbar('Failed to upload image', { variant: 'error' })
+    toast.error('Failed to upload image')
     throw error
   }
 }
@@ -242,14 +242,14 @@ export const uploadAudioToCloudinary = async (file: File): Promise<string> => {
     const { secure_url } = response.data;
 
     if (secure_url) {
-      enqueueSnackbar('🎧 Audio uploaded successfully!', { variant: 'success' });
+      toast.success('🎧 Audio uploaded successfully!');
       return secure_url;
     }
 
     throw new Error('Upload failed — no secure URL returned from Cloudinary.');
   } catch (error: any) {
     console.error('❌ Cloudinary audio upload error:', error.response?.data || error.message);
-    enqueueSnackbar('Failed to upload audio', { variant: 'error' });
+    toast.error('Failed to upload audio');
     throw error;
   }
 };
@@ -281,7 +281,7 @@ export const getUploadedImages = async (options?: { limit?: number; nextCursor?:
     };
   } catch (error) {
     console.error('Failed to fetch uploaded images:', error)
-    enqueueSnackbar('Failed to load uploaded images', { variant: 'error' })
+    toast.error('Failed to load uploaded images')
     return { images: [], hasMore: false };
   }
 }
@@ -290,11 +290,11 @@ export const getUploadedImages = async (options?: { limit?: number; nextCursor?:
 export const deleteUploadedImage = async (publicId: string): Promise<{ publicId: string }> => {
   try {
     const response: AxiosResponse<{ message: string; publicId: string }> = await api.delete(`/images/${publicId}`)
-    enqueueSnackbar('Image deleted successfully!', { variant: 'success' })
+    toast.success('Image deleted successfully!')
     return response.data
   } catch (error) {
     console.error('Failed to delete uploaded image:', error)
-    enqueueSnackbar('Failed to delete image', { variant: 'error' })
+    toast.error('Failed to delete image')
     throw error
   }
 }
@@ -326,7 +326,7 @@ export const getUploadedAudios = async (options?: { limit?: number; nextCursor?:
     };
   } catch (error) {
     console.error('Failed to fetch uploaded audios:', error)
-    enqueueSnackbar('Failed to load uploaded audios', { variant: 'error' })
+    toast.error('Failed to load uploaded audios')
     return { audios: [], hasMore: false };
   }
 }
@@ -335,11 +335,11 @@ export const getUploadedAudios = async (options?: { limit?: number; nextCursor?:
 export const deleteUploadedAudio = async (publicId: string): Promise<{ publicId: string }> => {
   try {
     const response: AxiosResponse<{ message: string; publicId: string }> = await api.delete(`/audios/${publicId}`)
-    enqueueSnackbar('Audio deleted successfully!', { variant: 'success' })
+    toast.success('Audio deleted successfully!')
     return response.data
   } catch (error) {
     console.error('Failed to delete uploaded audio:', error)
-    enqueueSnackbar('Failed to delete audio', { variant: 'error' })
+    toast.error('Failed to delete audio')
     throw error
   }
 }
