@@ -21,6 +21,7 @@ import {
   Music,
   ListMusic,
   Upload,
+  AudioLines
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -77,7 +78,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     {
       name: "Audios",
       href: "/audios",
-      icon: Upload,
+      icon: AudioLines,
       current: location.pathname === "/audios",
     },
   ];
