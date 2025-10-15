@@ -1,11 +1,12 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getUploadedAudios, deleteUploadedAudio } from '../../services/api'
+import { getUploadedAudios, deleteUploadedAudio, updateAudioName } from '../../services/api'
 import type { Audio } from '../../types'
 
 interface AudiosState {
   items: Audio[]
   loading: boolean
   loadingMore: boolean
+  updating: string | null // public_id of audio being updated
   error: string | null
   lastFetched: number | null // timestamp for caching
   nextCursor: string | null
@@ -16,6 +17,7 @@ const initialState: AudiosState = {
   items: [],
   loading: false,
   loadingMore: false,
+  updating: null,
   error: null,
   lastFetched: null,
   nextCursor: null,
@@ -46,6 +48,15 @@ export const deleteAudio = createAsyncThunk(
   async (publicId: string) => {
     await deleteUploadedAudio(publicId)
     return publicId
+  }
+)
+
+// Async thunk to update audio name
+export const updateAudio = createAsyncThunk(
+  'audios/updateAudio',
+  async ({ publicId, name }: { publicId: string; name: string }) => {
+    const result = await updateAudioName(publicId, name)
+    return { publicId, name: result.name }
   }
 )
 
@@ -111,6 +122,22 @@ const audiosSlice = createSlice({
       })
       .addCase(removeAudioLocally.fulfilled, (state, action) => {
         state.items = state.items.filter(audio => audio.public_id !== action.payload)
+      })
+      .addCase(updateAudio.pending, (state, action) => {
+        state.updating = action.meta.arg.publicId
+        state.error = null
+      })
+      .addCase(updateAudio.fulfilled, (state, action) => {
+        state.updating = null
+        const { publicId, name } = action.payload
+        const audioIndex = state.items.findIndex(audio => audio.public_id === publicId)
+        if (audioIndex !== -1) {
+          state.items[audioIndex] = { ...state.items[audioIndex], name }
+        }
+      })
+      .addCase(updateAudio.rejected, (state, action) => {
+        state.updating = null
+        state.error = action.error.message || 'Failed to update audio name'
       })
   },
 })

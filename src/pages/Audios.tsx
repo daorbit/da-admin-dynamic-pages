@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { enqueueSnackbar } from 'notistack';
 import {
   Box,
   Typography,
@@ -24,8 +25,9 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchAudios,
   loadMoreAudios,
+  updateAudio,
 } from "../store/slices/audiosSlice";
-import { uploadAudioToCloudinary, updateAudioName } from "../services/api";
+import { uploadAudioToCloudinary } from "../services/api";
 
 const Audios: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -33,6 +35,7 @@ const Audios: React.FC = () => {
     items: audios,
     loading,
     loadingMore,
+    updating,
     error,
     lastFetched,
     hasMore,
@@ -102,14 +105,24 @@ const Audios: React.FC = () => {
   const handleSaveEdit = async () => {
     if (!editingId || !editingName.trim()) return;
 
+    const newName = editingName.trim();
+
+    // Clear edit state immediately for better UX
+    setEditingId(null);
+    setEditingName("");
+
     try {
-      await updateAudioName(editingId, editingName.trim());
-      setEditingId(null);
-      setEditingName("");
-      // Refresh the list
-      dispatch(fetchAudios());
-    } catch (error) {
+      await dispatch(updateAudio({ publicId: editingId, name: newName })).unwrap();
+    } catch (error: any) {
       console.error("Failed to update audio name:", error);
+      
+      // Re-enter edit mode on error so user can try again
+      setEditingId(editingId);
+      setEditingName(newName);
+      
+      // Show specific error message
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to update audio name';
+      enqueueSnackbar(`Error: ${errorMessage}`, { variant: 'error' });
     }
   };
 
@@ -272,10 +285,20 @@ const Audios: React.FC = () => {
                         fullWidth
                       />
                       <Box sx={{ display: "flex", gap: 1 }}>
-                        <Button size="small" onClick={handleSaveEdit} variant="contained">
-                          Save
+                        <Button 
+                          size="small" 
+                          onClick={handleSaveEdit} 
+                          variant="contained"
+                          disabled={updating === audio.public_id}
+                          startIcon={updating === audio.public_id ? <CircularProgress size={14} /> : null}
+                        >
+                          {updating === audio.public_id ? 'Saving...' : 'Save'}
                         </Button>
-                        <Button size="small" onClick={handleCancelEdit}>
+                        <Button 
+                          size="small" 
+                          onClick={handleCancelEdit}
+                          disabled={updating === audio.public_id}
+                        >
                           Cancel
                         </Button>
                       </Box>
