@@ -19,7 +19,6 @@ import {
 } from '@mui/icons-material'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import axios from 'axios'
-import { enqueueSnackbar } from 'notistack'
 
 const Signup: React.FC = () => {
   const navigate = useNavigate()
@@ -63,7 +62,6 @@ const Signup: React.FC = () => {
       })
 
       if (response.data.token && response.data.user) {
-        enqueueSnackbar('Account created successfully! Please log in.', { variant: 'success' })
         navigate('/login')
       }
     } catch (err: any) {
