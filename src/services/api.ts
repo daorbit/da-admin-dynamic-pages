@@ -343,16 +343,3 @@ export const deleteUploadedAudio = async (publicId: string): Promise<{ publicId:
     throw error
   }
 }
-
-// Update audio name
-export const updateAudioName = async (publicId: string, name: string): Promise<{ publicId: string; name: string }> => {
-  try {
-    const response: AxiosResponse<{ message: string; publicId: string; name: string }> = await api.put(`/audios/${publicId}`, { name })
-    enqueueSnackbar('Audio name updated successfully!', { variant: 'success' })
-    return response.data
-  } catch (error) {
-    console.error('Failed to update audio name:', error)
-    enqueueSnackbar('Failed to update audio name', { variant: 'error' })
-    throw error
-  }
-}

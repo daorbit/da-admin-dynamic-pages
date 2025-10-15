@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { enqueueSnackbar } from 'notistack';
 import {
   Box,
   Typography,
@@ -11,21 +10,17 @@ import {
   Button,
   Input,
   Skeleton,
-  TextField,
-  IconButton,
 } from "@mui/material";
 import {
   CloudUpload as CloudUploadIcon,
   Refresh as RefreshIcon,
   PlayArrow as PlayArrowIcon,
   Pause as PauseIcon,
-  Edit as EditIcon,
 } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
   fetchAudios,
   loadMoreAudios,
-  updateAudio,
 } from "../store/slices/audiosSlice";
 import { uploadAudioToCloudinary } from "../services/api";
 
@@ -35,7 +30,6 @@ const Audios: React.FC = () => {
     items: audios,
     loading,
     loadingMore,
-    updating,
     error,
     lastFetched,
     hasMore,
@@ -44,8 +38,6 @@ const Audios: React.FC = () => {
 
   const [uploadLoading, setUploadLoading] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editingName, setEditingName] = useState("");
 
   useEffect(() => {
     const CACHE_DURATION = 5 * 60 * 1000;
@@ -95,40 +87,6 @@ const Audios: React.FC = () => {
     } else {
       setPlayingId(id);
     }
-  };
-
-  const handleEdit = (audio: any) => {
-    setEditingId(audio.public_id);
-    setEditingName(audio.name || audio.public_id.split('/').pop() || '');
-  };
-
-  const handleSaveEdit = async () => {
-    if (!editingId || !editingName.trim()) return;
-
-    const newName = editingName.trim();
-
-    // Clear edit state immediately for better UX
-    setEditingId(null);
-    setEditingName("");
-
-    try {
-      await dispatch(updateAudio({ publicId: editingId, name: newName })).unwrap();
-    } catch (error: any) {
-      console.error("Failed to update audio name:", error);
-      
-      // Re-enter edit mode on error so user can try again
-      setEditingId(editingId);
-      setEditingName(newName);
-      
-      // Show specific error message
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to update audio name';
-      enqueueSnackbar(`Error: ${errorMessage}`, { variant: 'error' });
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingId(null);
-    setEditingName("");
   };
 
   if (loading) {
@@ -271,66 +229,21 @@ const Audios: React.FC = () => {
                   style={{ display: 'none' }}
                 />
                 <CardContent sx={{ flexGrow: 1 }}>
-                  {editingId === audio.public_id ? (
-                    <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-                      <TextField
-                        size="small"
-                        value={editingName}
-                        onChange={(e) => setEditingName(e.target.value)}
-                        onKeyPress={(e) => {
-                          if (e.key === 'Enter') handleSaveEdit();
-                          if (e.key === 'Escape') handleCancelEdit();
-                        }}
-                        autoFocus
-                        fullWidth
-                      />
-                      <Box sx={{ display: "flex", gap: 1 }}>
-                        <Button 
-                          size="small" 
-                          onClick={handleSaveEdit} 
-                          variant="contained"
-                          disabled={updating === audio.public_id}
-                          startIcon={updating === audio.public_id ? <CircularProgress size={14} /> : null}
-                        >
-                          {updating === audio.public_id ? 'Saving...' : 'Save'}
-                        </Button>
-                        <Button 
-                          size="small" 
-                          onClick={handleCancelEdit}
-                          disabled={updating === audio.public_id}
-                        >
-                          Cancel
-                        </Button>
-                      </Box>
-                    </Box>
-                  ) : (
-                    <>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
-                            {audio.name || audio.public_id.split('/').pop()}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            Uploaded: {new Date(audio.created_at).toLocaleDateString()}
-                          </Typography>
-                        </Box>
-                        <IconButton
-                          size="small"
-                          onClick={() => handleEdit(audio)}
-                          sx={{ ml: 1 }}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Box>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        sx={{ mt: 1 }}
-                      >
-                        {audio.public_id}
-                      </Typography>
-                    </>
-                  )}
+                  <Box sx={{ flex: 1 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, mb: 0.5 }}>
+                      {audio.name || audio.public_id.split('/').pop()}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Uploaded: {new Date(audio.created_at).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ mt: 1 }}
+                  >
+                    {audio.public_id}
+                  </Typography>
                 </CardContent>
               </Card>
             </Grid>
