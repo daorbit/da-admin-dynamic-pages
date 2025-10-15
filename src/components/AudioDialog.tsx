@@ -6,8 +6,6 @@ import {
   Button,
   Box,
   Typography,
-  Grid,
-  Card,
   CircularProgress,
   IconButton,
   Input,
@@ -173,72 +171,64 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
         }}
       >
         {loading ? (
-          <Grid container spacing={2}>
+          <Box>
             {Array.from({ length: 8 }).map((_, index) => (
-              <Grid item xs={12} sm={6} md={4} key={index}>
-                <Skeleton
-                  variant="rectangular"
-                  height={80}
-                  sx={{ borderRadius: 1 }}
-                />
-              </Grid>
+              <Skeleton
+                key={index}
+                variant="rectangular"
+                height={60}
+                sx={{ mb: 1, borderRadius: 1 }}
+              />
             ))}
-          </Grid>
+          </Box>
         ) : (
-          <Grid container spacing={2}>
+          <Box>
             {audios.map((audio) => (
-              <Grid item xs={12} sm={6} md={4} key={audio.public_id}>
-                <Card>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      p: 2,
-                    }}
-                  >
-                    <Box sx={{ display: "flex", alignItems: "center", flex: 1 }}>
-                      <IconButton
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handlePlay(audio.public_id);
-                        }}
-                        size="small"
-                      >
-                        {playingId === audio.public_id ? (
-                          <PauseIcon />
-                        ) : (
-                          <PlayArrowIcon />
-                        )}
-                      </IconButton>
-                      <Box sx={{ ml: 1, flex: 1 }}>
-                        <Typography variant="body2" noWrap>
-                          {audio.public_id.split('/').pop()}
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {new Date(audio.created_at).toLocaleDateString()}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <Button
-                      size="small"
-                      variant="outlined"
-                      onClick={() => handleAudioSelect(audio.secure_url)}
-                      sx={{ ml: 1 }}
-                    >
-                      Select
-                    </Button>
-                  </Box>
-                  <audio
-                    src={audio.secure_url}
-                    data-id={audio.public_id}
-                    onEnded={() => setPlayingId(null)}
-                    style={{ display: 'none' }}
-                  />
-                </Card>
-              </Grid>
+              <Box
+                key={audio.public_id}
+                onClick={() => handleAudioSelect(audio.secure_url)}
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  p: 2,
+                  borderBottom: "1px solid #e0e0e0",
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "#f5f5f5",
+                  },
+                }}
+              >
+                <IconButton
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handlePlay(audio.public_id);
+                  }}
+                  size="small"
+                  sx={{ mr: 2 }}
+                >
+                  {playingId === audio.public_id ? (
+                    <PauseIcon />
+                  ) : (
+                    <PlayArrowIcon />
+                  )}
+                </IconButton>
+                <Box sx={{ flex: 1 }}>
+                  <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    {audio.public_id.split('/').pop()}
+                  </Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    {new Date(audio.created_at).toLocaleDateString()}
+                  </Typography>
+                </Box>
+                <audio
+                  src={audio.secure_url}
+                  data-id={audio.public_id}
+                  onEnded={() => setPlayingId(null)}
+                  style={{ display: 'none' }}
+                />
+              </Box>
             ))}
-          </Grid>
+          </Box>
         )}
 
         {audios.length === 0 && !loading && (
