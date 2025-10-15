@@ -51,8 +51,19 @@ api.interceptors.response.use(
   (error) => {
     const message = error.response?.data?.message || 'An error occurred'
     
+    // Handle 401 errors - token might be expired
+    if (error.response?.status === 401) {
+      // Only logout if this isn't a verify endpoint call (to avoid loops)
+      if (!error.config?.url?.includes('/auth/verify')) {
+        console.log('401 error on API call, logging out user')
+        localStorage.removeItem('da-cms-token')
+        // Force page reload to reset auth state
+        window.location.reload()
+      }
+    }
+    
     // Don't show snackbar for 404 errors when fetching individual items
-    if (error.response?.status !== 404) {
+    if (error.response?.status !== 404 && error.response?.status !== 401) {
       toast.error(message)
     }
     
