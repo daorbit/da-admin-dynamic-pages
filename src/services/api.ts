@@ -17,6 +17,7 @@ import type {
 // Cloudinary configuration
 const CLOUDINARY_CLOUD_NAME = (import.meta as any).env?.VITE_CLOUDINARY_CLOUD_NAME || 'your-cloud-name'
 const CLOUDINARY_UPLOAD_PRESET = (import.meta as any).env?.VITE_CLOUDINARY_UPLOAD_PRESET || 'your-upload-preset'
+const CLOUDINARY_AUDIO_UPLOAD_PRESET = (import.meta as any).env?.VITE_CLOUDINARY_AUDIO_UPLOAD_PRESET || 'da-orbit-audio'
 
 // Create axios instance with default config
 const api = axios.create({
@@ -189,7 +190,7 @@ export const playlistsAPI = {
 
 export default api
 
-// Cloudinary upload function
+// Cloudinary upload function for images
 export const uploadToCloudinary = async (file: File): Promise<string> => {
   const formData = new FormData()
   formData.append('file', file)
@@ -216,6 +217,38 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
   } catch (error) {
     console.error('Cloudinary upload error:', error)
     enqueueSnackbar('Failed to upload image', { variant: 'error' })
+    throw error
+  }
+}
+
+// Cloudinary upload function for audio
+export const uploadAudioToCloudinary = async (file: File): Promise<string> => {
+  const formData = new FormData()
+  formData.append('file', file)
+  formData.append('upload_preset', CLOUDINARY_AUDIO_UPLOAD_PRESET)
+  formData.append('cloud_name', CLOUDINARY_CLOUD_NAME)
+  formData.append('folder', 'da-orbit-audio')
+
+  try {
+    const response = await axios.post(
+      `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/video/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    )
+
+    if (response.data.secure_url) {
+      enqueueSnackbar('Audio uploaded successfully!', { variant: 'success' })
+      return response.data.secure_url
+    } else {
+      throw new Error('Upload failed - no URL returned')
+    }
+  } catch (error) {
+    console.error('Cloudinary audio upload error:', error)
+    enqueueSnackbar('Failed to upload audio', { variant: 'error' })
     throw error
   }
 }
@@ -261,6 +294,51 @@ export const deleteUploadedImage = async (publicId: string): Promise<{ publicId:
   } catch (error) {
     console.error('Failed to delete uploaded image:', error)
     enqueueSnackbar('Failed to delete image', { variant: 'error' })
+    throw error
+  }
+}
+
+// Get uploaded audios from Cloudinary
+export const getUploadedAudios = async (options?: { limit?: number; nextCursor?: string }): Promise<{
+  audios: Array<{ public_id: string; secure_url: string; created_at: string }>;
+  nextCursor?: string;
+  hasMore: boolean;
+}> => {
+  try {
+    const params = new URLSearchParams();
+    if (options?.limit) params.append('limit', options.limit.toString());
+    if (options?.nextCursor) params.append('next_cursor', options.nextCursor);
+
+    const queryString = params.toString();
+    const url = `/audios${queryString ? `?${queryString}` : ''}`;
+
+    const response: AxiosResponse<{
+      audios: Array<{ public_id: string; secure_url: string; created_at: string }>;
+      next_cursor?: string;
+      has_more: boolean;
+    }> = await api.get(url);
+
+    return {
+      audios: response.data.audios,
+      nextCursor: response.data.next_cursor,
+      hasMore: response.data.has_more
+    };
+  } catch (error) {
+    console.error('Failed to fetch uploaded audios:', error)
+    enqueueSnackbar('Failed to load uploaded audios', { variant: 'error' })
+    return { audios: [], hasMore: false };
+  }
+}
+
+// Delete audio from Cloudinary
+export const deleteUploadedAudio = async (publicId: string): Promise<{ publicId: string }> => {
+  try {
+    const response: AxiosResponse<{ message: string; publicId: string }> = await api.delete(`/audios/${publicId}`)
+    enqueueSnackbar('Audio deleted successfully!', { variant: 'success' })
+    return response.data
+  } catch (error) {
+    console.error('Failed to delete uploaded audio:', error)
+    enqueueSnackbar('Failed to delete audio', { variant: 'error' })
     throw error
   }
 }

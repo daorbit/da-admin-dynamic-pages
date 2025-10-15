@@ -13,7 +13,15 @@ import {
   useTheme,
   useMediaQuery,
 } from "@mui/material";
-import { Home, LayoutDashboard, FileText, LogOut, Music, ListMusic, Upload } from "lucide-react";
+import {
+  Home,
+  LayoutDashboard,
+  FileText,
+  LogOut,
+  Music,
+  ListMusic,
+  Upload,
+} from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 
 interface LayoutProps {
@@ -65,6 +73,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       icon: ListMusic,
       current: location.pathname === "/playlists",
     },
+
+    {
+      name: "Audios",
+      href: "/audios",
+      icon: Upload,
+      current: location.pathname === "/audios",
+    },
   ];
 
   const isCollapsed = !isMobile;
@@ -110,7 +125,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     mt: 2,
                     backgroundColor: item.current ? "#5a55d8" : "transparent",
                     "&:hover": {
-                      backgroundColor: item.current ? "#5a55d8" : "rgba(255, 255, 255, 0.1)",
+                      backgroundColor: item.current
+                        ? "#5a55d8"
+                        : "rgba(255, 255, 255, 0.1)",
                     },
                   }}
                 >
@@ -141,9 +158,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               sx={{
                 justifyContent: isCollapsed ? "center" : "flex-start",
                 px: 1,
-                backgroundColor: location.pathname === "/images" ? "#5a55d8" : "transparent",
+                backgroundColor:
+                  location.pathname === "/images" ? "#5a55d8" : "transparent",
                 "&:hover": {
-                  backgroundColor: location.pathname === "/images" ? "#5a55d8" : "rgba(255, 255, 255, 0.1)",
+                  backgroundColor:
+                    location.pathname === "/images"
+                      ? "#5a55d8"
+                      : "rgba(255, 255, 255, 0.1)",
                 },
               }}
             >

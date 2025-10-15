@@ -50,6 +50,12 @@ export interface Image {
   created_at: string;
 }
 
+export interface Audio {
+  public_id: string;
+  secure_url: string;
+  created_at: string;
+}
+
 export interface CreatePageData {
   title: string;
   description: string;
