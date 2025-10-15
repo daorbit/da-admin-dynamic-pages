@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Typography, Grid } from "@mui/material";
+import { Box, Typography, Grid, Skeleton } from "@mui/material";
 import {
   BarChart,
   Bar,
@@ -17,7 +17,11 @@ import {
   Area,
 } from "recharts";
 
-const Charts: React.FC = () => {
+interface ChartsProps {
+  loading?: boolean;
+}
+
+const Charts: React.FC<ChartsProps> = ({ loading = false }) => {
   // Hard coded data for charts
   const barData = [
     { name: "Mon", views: 400 },
@@ -67,15 +71,19 @@ const Charts: React.FC = () => {
           >
             Page Views This Week
           </Typography>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={barData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="views" fill="#2196f3" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: 1 }} />
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <BarChart data={barData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="views" fill="#2196f3" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography
@@ -85,22 +93,26 @@ const Charts: React.FC = () => {
           >
             User Growth Trend
           </Typography>
-          <ResponsiveContainer width="100%" height={250}>
-            <LineChart data={lineData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Line
-                type="monotone"
-                dataKey="users"
-                stroke="#4caf50"
-                strokeWidth={3}
-                dot={{ fill: "#4caf50", strokeWidth: 2, r: 4 }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: 1 }} />
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <LineChart data={lineData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Line
+                  type="monotone"
+                  dataKey="users"
+                  stroke="#4caf50"
+                  strokeWidth={3}
+                  dot={{ fill: "#4caf50", strokeWidth: 2, r: 4 }}
+                  activeDot={{ r: 6 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography
@@ -110,29 +122,33 @@ const Charts: React.FC = () => {
           >
             Page Status Distribution
           </Typography>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, percent }: any) =>
-                  `${name} ${(percent * 100).toFixed(0)}%`
-                }
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-                stroke="#fff"
-                strokeWidth={2}
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <Skeleton variant="circular" width={160} height={160} sx={{ mx: "auto", mt: 2 }} />
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  label={({ name, percent }: any) =>
+                    `${name} ${(percent * 100).toFixed(0)}%`
+                  }
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  stroke="#fff"
+                  strokeWidth={2}
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography
@@ -142,21 +158,25 @@ const Charts: React.FC = () => {
           >
             Revenue Trend
           </Typography>
-          <ResponsiveContainer width="100%" height={250}>
-            <AreaChart data={areaData}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="name" />
-              <YAxis />
-              <Tooltip />
-              <Area
-                type="monotone"
-                dataKey="revenue"
-                stroke="#9c27b0"
-                fill="#9c27b0"
-                fillOpacity={0.3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          {loading ? (
+            <Skeleton variant="rectangular" width="100%" height={250} sx={{ borderRadius: 1 }} />
+          ) : (
+            <ResponsiveContainer width="100%" height={250}>
+              <AreaChart data={areaData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="revenue"
+                  stroke="#9c27b0"
+                  fill="#9c27b0"
+                  fillOpacity={0.3}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </Grid>
       </Grid>
     </Box>

@@ -5,8 +5,8 @@ import {
   Grid,
   Card,
   CardContent,
-  CircularProgress,
   Alert,
+  Skeleton,
 } from "@mui/material";
 import {
   FileText,
@@ -50,19 +50,6 @@ const Dashboard: React.FC = () => {
     }
   }, [dispatch, lastFetched]);
 
-  if (loading) {
-    return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="400px"
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   if (error) {
     return (
       <Alert severity="error" sx={{ mb: 2 }}>
@@ -80,29 +67,47 @@ const Dashboard: React.FC = () => {
       <Grid container spacing={4} sx={{ mb: 6, mt: 2 }}>
         {stats.map((stat, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card
-              sx={{
-                color: stat.color,
-                borderRadius: 2,
-                border: `2px solid ${stat.color}`,
-                boxShadow: "none",
-              }}
-            >
-              <CardContent sx={{ display: "flex", alignItems: "center", p: 2 }}>
-                <stat.icon size={24} />
-                <Box sx={{ ml: 2 }}>
-                  <Typography variant="body2" gutterBottom>
-                    {stat.title}
-                  </Typography>
-                  <Typography variant="h6">{stat.value}</Typography>
-                </Box>
-              </CardContent>
-            </Card>
+            {loading ? (
+              <Card
+                sx={{
+                  borderRadius: 2,
+                  boxShadow: "none",
+                  border: "1px solid #e0e0e0",
+                }}
+              >
+                <CardContent sx={{ display: "flex", alignItems: "center", p: 2 }}>
+                  <Skeleton variant="circular" width={24} height={24} />
+                  <Box sx={{ ml: 2, flex: 1 }}>
+                    <Skeleton variant="text" width="80%" height={20} />
+                    <Skeleton variant="text" width="60%" height={28} />
+                  </Box>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card
+                sx={{
+                  color: stat.color,
+                  borderRadius: 2,
+                  border: `2px solid ${stat.color}`,
+                  boxShadow: "none",
+                }}
+              >
+                <CardContent sx={{ display: "flex", alignItems: "center", p: 2 }}>
+                  <stat.icon size={24} />
+                  <Box sx={{ ml: 2 }}>
+                    <Typography variant="body2" gutterBottom>
+                      {stat.title}
+                    </Typography>
+                    <Typography variant="h6">{stat.value}</Typography>
+                  </Box>
+                </CardContent>
+              </Card>
+            )}
           </Grid>
         ))}
       </Grid>
 
-      <Charts />
+      <Charts loading={loading} />
     </Box>
   );
 };
