@@ -19,13 +19,14 @@ import {
   Divider,
   IconButton,
 } from "@mui/material";
-import { Image } from "@mui/icons-material";
+import { Image, Audiotrack } from "@mui/icons-material";
 import { pagesAPI } from "../services/api";
 import SummernoteEditor, {
   SummernoteEditorRef,
 } from "../components/SummernoteEditor";
 import QuillEditor, { QuillEditorRef } from "../components/QuillEditor";
 import ImageDialog from "../components/ImageDialog";
+import AudioDialog from "../components/AudioDialog";
 import { useAppDispatch } from "../store/hooks";
 import { createPage, updatePage } from "../store/slices/pagesSlice";
 import { useAIGeneration, AIProvider } from "../hooks/useAIGeneration";
@@ -89,6 +90,7 @@ const PageForm: React.FC = () => {
   const [selectedAI, setSelectedAI] = useState<AIProvider>("perplexity");
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [thumbnailDialogOpen, setThumbnailDialogOpen] = useState(false);
+  const [audioDialogOpen, setAudioDialogOpen] = useState(false);
 
   const { generateContent, generating } = useAIGeneration({
     onContentGenerated: (content: string) => {
@@ -234,6 +236,10 @@ const PageForm: React.FC = () => {
 
   const handleThumbnailSelect = (imageUrl: string) => {
     setValue("thumbnailUrl", imageUrl);
+  };
+
+  const handleAudioSelect = (audioUrl: string) => {
+    setValue("audioUrl", audioUrl);
   };
 
   if (loading && isEditing) {
@@ -458,23 +464,38 @@ const PageForm: React.FC = () => {
                   <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                     Audio URL
                   </Typography>
-                  <Controller
-                    name="audioUrl"
-                    control={control}
-                    render={({ field }) => (
-                      <TextField
-                        {...field}
-                        fullWidth
-                        error={!!errors.audioUrl}
-                        helperText={errors.audioUrl?.message}
-                        sx={{
-                          "& .MuiOutlinedInput-root": {
-                            borderRadius: "8px",
-                          },
-                        }}
-                      />
-                    )}
-                  />
+                  <Box display="flex" gap={1}>
+                    <Controller
+                      name="audioUrl"
+                      control={control}
+                      render={({ field }) => (
+                        <TextField
+                          {...field}
+                          fullWidth
+                          placeholder="Enter audio URL or select from gallery"
+                          error={!!errors.audioUrl}
+                          helperText={errors.audioUrl?.message}
+                          sx={{
+                            "& .MuiOutlinedInput-root": {
+                              borderRadius: "8px",
+                            },
+                          }}
+                        />
+                      )}
+                    />
+                    <IconButton
+                      onClick={() => setAudioDialogOpen(true)}
+                      sx={{
+                        border: "1px solid #e0e0e0",
+                        borderRadius: "8px",
+                        "&:hover": {
+                          backgroundColor: "#f5f5f5",
+                        },
+                      }}
+                    >
+                      <Audiotrack />
+                    </IconButton>
+                  </Box>
                 </Grid>
 
                 <Grid item xs={12}>
@@ -746,6 +767,12 @@ const PageForm: React.FC = () => {
         open={thumbnailDialogOpen}
         onClose={() => setThumbnailDialogOpen(false)}
         onSelectImage={handleThumbnailSelect}
+      />
+
+      <AudioDialog
+        open={audioDialogOpen}
+        onClose={() => setAudioDialogOpen(false)}
+        onSelectAudio={handleAudioSelect}
       />
     </Box>
   );

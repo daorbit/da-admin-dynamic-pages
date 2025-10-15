@@ -14,11 +14,12 @@ import {
   MenuItem,
   IconButton,
 } from "@mui/material";
-import { Image } from "@mui/icons-material";
+import { Image, Audiotrack } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { createTrack, updateTrack } from "../store/slices/tracksSlice";
 import { tracksAPI, playlistsAPI } from "../services/api";
 import ImageDialog from "../components/ImageDialog";
+import AudioDialog from "../components/AudioDialog";
 import type { CreateTrackData, Playlist } from "../types";
 
 const trackSchema = yup.object({
@@ -57,6 +58,7 @@ const TrackForm: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
+  const [audioDialogOpen, setAudioDialogOpen] = useState(false);
 
   const {
     control,
@@ -149,6 +151,10 @@ const TrackForm: React.FC = () => {
 
   const handleImageSelect = (imageUrl: string) => {
     setValue('thumbnail', imageUrl);
+  };
+
+  const handleAudioSelect = (audioUrl: string) => {
+    setValue('audioUrl', audioUrl);
   };
 
   if (loadingTrack) {
@@ -383,23 +389,38 @@ const TrackForm: React.FC = () => {
               <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Audio URL
               </Typography>
-              <Controller
-                name="audioUrl"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    error={!!errors.audioUrl}
-                    helperText={errors.audioUrl?.message}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
-                    }}
-                  />
-                )}
-              />
+              <Box display="flex" gap={1}>
+                <Controller
+                  name="audioUrl"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      placeholder="Enter audio URL or select from gallery"
+                      error={!!errors.audioUrl}
+                      helperText={errors.audioUrl?.message}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                      }}
+                    />
+                  )}
+                />
+                <IconButton
+                  onClick={() => setAudioDialogOpen(true)}
+                  sx={{
+                    border: "1px solid #e0e0e0",
+                    borderRadius: "8px",
+                    "&:hover": {
+                      backgroundColor: "#f5f5f5",
+                    },
+                  }}
+                >
+                  <Audiotrack />
+                </IconButton>
+              </Box>
             </Grid>
 
             <Grid item xs={12}>
@@ -483,6 +504,12 @@ const TrackForm: React.FC = () => {
         open={imageDialogOpen}
         onClose={() => setImageDialogOpen(false)}
         onSelectImage={handleImageSelect}
+      />
+
+      <AudioDialog
+        open={audioDialogOpen}
+        onClose={() => setAudioDialogOpen(false)}
+        onSelectAudio={handleAudioSelect}
       />
     </Box>
   );
