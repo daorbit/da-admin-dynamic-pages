@@ -39,6 +39,7 @@ import {
   setPagination,
 } from "../store/slices/pagesSlice";
 import type { Page } from "../types";
+import TableSkeleton from "../components/TableSkeleton";
 
 const PageList: React.FC = () => {
   const navigate = useNavigate();
@@ -374,6 +375,9 @@ const PageList: React.FC = () => {
           rowCount={pagination.totalItems}
           paginationMode="server"
           loading={loading}
+          slots={{
+            loadingOverlay: () => <TableSkeleton columns={6} />,
+          }}
           disableRowSelectionOnClick
           sx={{
             "& .MuiDataGrid-cell": {

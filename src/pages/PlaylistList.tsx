@@ -42,6 +42,7 @@ import {
   setIsPublicFilter,
 } from "../store/slices/playlistsSlice";
 import type { Playlist } from "../types";
+import TableSkeleton from "../components/TableSkeleton";
 
 const PlaylistList: React.FC = () => {
   const navigate = useNavigate();
@@ -397,6 +398,9 @@ const PlaylistList: React.FC = () => {
               pageSize: model.pageSize,
             })
           }
+          slots={{
+            loadingOverlay: () => <TableSkeleton columns={8} />,
+          }}
           disableRowSelectionOnClick
           sx={{
             "& .MuiDataGrid-cell": {

@@ -42,6 +42,7 @@ import {
   setAuthorFilter,
 } from "../store/slices/tracksSlice";
 import type { Track } from "../types";
+import TableSkeleton from "../components/TableSkeleton";
 
 const TrackList: React.FC = () => {
   const navigate = useNavigate();
@@ -420,6 +421,9 @@ const TrackList: React.FC = () => {
               pageSize: model.pageSize,
             })
           }
+          slots={{
+            loadingOverlay: () => <TableSkeleton columns={10} />,
+          }}
           disableRowSelectionOnClick
           sx={{
             "& .MuiDataGrid-cell": {
