@@ -201,6 +201,19 @@ const TrackList: React.FC = () => {
       ),
     },
     {
+      field: 'trending',
+      headerName: 'Trending',
+      width: 100,
+      renderCell: (params) => (
+        <Chip
+          label={params.value ? 'Yes' : 'No'}
+          size="small"
+          color={params.value ? 'success' : 'default'}
+          variant={params.value ? 'filled' : 'outlined'}
+        />
+      ),
+    },
+    {
       field: 'duration',
       headerName: 'Duration',
       width: 100,

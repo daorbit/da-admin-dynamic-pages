@@ -23,6 +23,7 @@ export interface Track {
   date?: string;
   thumbnail?: string;
   category?: string;
+  trending?: boolean;
   audioUrl?: string;
   playlists?: string[];
   createdAt: string;
@@ -83,6 +84,7 @@ export interface CreateTrackData {
   date?: string;
   thumbnail?: string;
   category?: string;
+  trending?: boolean;
   audioUrl?: string;
   playlistId?: string;
 }

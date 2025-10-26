@@ -13,6 +13,8 @@ import {
   Grid,
   MenuItem,
   IconButton,
+  Checkbox,
+  FormControlLabel,
 } from "@mui/material";
 import { Image, Audiotrack } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -43,6 +45,7 @@ const trackSchema = yup.object({
     .string()
     .optional()
     .max(50, "Category cannot be more than 50 characters"),
+  trending: yup.boolean().optional(),
   audioUrl: yup.string().optional().url("Must be a valid URL"),
   playlistId: yup.string().optional(),
 });
@@ -77,6 +80,7 @@ const TrackForm: React.FC = () => {
       date: "",
       thumbnail: "",
       category: "",
+      trending: false,
       audioUrl: "",
       playlistId: "",
     },
@@ -97,6 +101,7 @@ const TrackForm: React.FC = () => {
             date: response.data.date || "",
             thumbnail: response.data.thumbnail || "",
             category: response.data.category || "",
+            trending: response.data.trending || false,
             audioUrl: response.data.audioUrl || "",
             playlistId: response.data.playlists?.[0] || "",
           });
@@ -340,6 +345,34 @@ const TrackForm: React.FC = () => {
                     sx={{
                       "& .MuiOutlinedInput-root": {
                         borderRadius: "8px",
+                      },
+                    }}
+                  />
+                )}
+              />
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <Controller
+                name="trending"
+                control={control}
+                render={({ field }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        {...field}
+                        checked={field.value || false}
+                        sx={{
+                          '&.Mui-checked': {
+                            color: '#1976d2',
+                          },
+                        }}
+                      />
+                    }
+                    label="Trending"
+                    sx={{
+                      '& .MuiFormControlLabel-label': {
+                        fontSize: '14px',
                       },
                     }}
                   />
