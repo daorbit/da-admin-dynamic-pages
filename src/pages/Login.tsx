@@ -9,7 +9,7 @@ import {
   Container,
   InputAdornment,
   IconButton,
-  // Link,
+  Link,
 } from '@mui/material'
 import {
   Login as LoginIcon,
@@ -17,7 +17,7 @@ import {
   VisibilityOff,
   AdminPanelSettings,
 } from '@mui/icons-material'
-import {  useNavigate } from 'react-router-dom'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
 const Login: React.FC = () => {
@@ -165,11 +165,11 @@ const Login: React.FC = () => {
             </Button>
           </Box>
 
-          {/* <Box sx={{ mt: 2, width: '100%', textAlign: 'center' }}>
+          <Box sx={{ mt: 2, width: '100%', textAlign: 'center' }}>
             <Link component={RouterLink} to="/signup" variant="body2">
               Don't have an account? Sign up
             </Link>
-          </Box> */}
+          </Box>
         </Paper>
       </Box>
     </Container>

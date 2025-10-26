@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import { Box, Skeleton } from "@mui/material";
+import { Navigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import Login from "../pages/Login";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -54,7 +54,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   if (!isAuthenticated) {
-    return <Login />;
+    return <Navigate to="/login" replace />;
   }
 
   return <>{children}</>;

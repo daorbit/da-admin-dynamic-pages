@@ -1,5 +1,5 @@
 import React, { useState, ReactNode } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
   Box,
   Drawer,
@@ -44,6 +44,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const { logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -209,6 +210,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               component="button"
               onClick={() => {
                 logout();
+                navigate('/login');
                 if (isMobile) setMobileOpen(false);
               }}
               sx={{
