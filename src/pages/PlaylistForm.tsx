@@ -63,7 +63,7 @@ const PlaylistForm: React.FC = () => {
       description: '',
       duration: '',
       thumbnail: '',
-      createdBy: '',
+      createdBy: 'The Techodio',
       tracks: [],
       isPublic: true,
       tags: [],

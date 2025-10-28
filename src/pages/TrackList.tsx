@@ -223,16 +223,6 @@ const TrackList: React.FC = () => {
         </Typography>
       ),
     },
-    {
-      field: 'listeners',
-      headerName: 'Listeners',
-      width: 100,
-      renderCell: (params) => (
-        <Typography variant="body2">
-          {params.value || '0'}
-        </Typography>
-      ),
-    },
     // {
     //   field: 'playlists',
     //   headerName: 'Playlists',
