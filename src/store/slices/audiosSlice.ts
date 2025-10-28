@@ -1,25 +1,33 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { getUploadedAudios, deleteUploadedAudio } from '../../services/api'
-import type { Audio } from '../../types'
+import { getUploadedAudios, deleteUploadedAudio, getAudioFolders } from '../../services/api'
+import type { Audio, AudioFolder } from '../../types'
 
 interface AudiosState {
   items: Audio[]
+  folders: AudioFolder[]
   loading: boolean
+  loadingFolders: boolean
   loadingMore: boolean
   error: string | null
   lastFetched: number | null // timestamp for caching
+  lastFetchedFolders: number | null // timestamp for caching folders
   nextCursor: string | null
   hasMore: boolean
+  viewMode: 'flat' | 'folders' // Add view mode
 }
 
 const initialState: AudiosState = {
   items: [],
+  folders: [],
   loading: false,
+  loadingFolders: false,
   loadingMore: false,
   error: null,
   lastFetched: null,
+  lastFetchedFolders: null,
   nextCursor: null,
   hasMore: false,
+  viewMode: 'folders', // Default to folders view
 }
 
 // Async thunk to fetch uploaded audios
@@ -49,6 +57,15 @@ export const deleteAudio = createAsyncThunk(
   }
 )
 
+// Async thunk to fetch audio folders
+export const fetchAudioFolders = createAsyncThunk(
+  'audios/fetchAudioFolders',
+  async () => {
+    const result = await getAudioFolders()
+    return result
+  }
+)
+
 // Remove audio locally (for optimistic updates)
 export const removeAudioLocally = createAsyncThunk(
   'audios/removeAudioLocally',
@@ -64,6 +81,9 @@ const audiosSlice = createSlice({
     clearAudios: (state) => {
       state.items = []
       state.lastFetched = null
+    },
+    setViewMode: (state, action) => {
+      state.viewMode = action.payload
     },
   },
   extraReducers: (builder) => {
@@ -112,8 +132,21 @@ const audiosSlice = createSlice({
       .addCase(removeAudioLocally.fulfilled, (state, action) => {
         state.items = state.items.filter(audio => audio.public_id !== action.payload)
       })
+      .addCase(fetchAudioFolders.pending, (state) => {
+        state.loadingFolders = true
+        state.error = null
+      })
+      .addCase(fetchAudioFolders.fulfilled, (state, action) => {
+        state.loadingFolders = false
+        state.folders = action.payload.folders
+        state.lastFetchedFolders = Date.now()
+      })
+      .addCase(fetchAudioFolders.rejected, (state, action) => {
+        state.loadingFolders = false
+        state.error = action.error.message || 'Failed to fetch audio folders'
+      })
   },
 })
 
-export const { clearAudios } = audiosSlice.actions
+export const { clearAudios, setViewMode } = audiosSlice.actions
 export default audiosSlice.reducer

@@ -56,6 +56,20 @@ export interface Audio {
   secure_url: string;
   created_at: string;
   name?: string;
+  folder?: string;
+}
+
+export interface AudioFolder {
+  name: string;
+  path: string;
+  audios: Audio[];
+  audioCount: number;
+}
+
+export interface AudioFoldersResponse {
+  folders: AudioFolder[];
+  totalFolders: number;
+  totalAudios: number;
 }
 
 export interface CreatePageData {

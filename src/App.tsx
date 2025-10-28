@@ -16,6 +16,7 @@ import PlaylistForm from './pages/PlaylistForm'
 import PlaylistDetail from './pages/PlaylistDetail'
 import Images from './pages/Images'
 import Audios from './pages/Audios'
+import FolderAudios from './pages/FolderAudios'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
                     <Route path="/playlists/:id/edit" element={<PlaylistForm />} />
                     <Route path="/images" element={<Images />} />
                     <Route path="/audios" element={<Audios />} />
+                    <Route path="/audios/folder/:folderPath" element={<FolderAudios />} />
                   </Routes>
                 </Layout>
               </ProtectedRoute>

@@ -11,7 +11,8 @@ import type {
   CreatePlaylistData,
   UpdatePlaylistData,
   PaginatedResponse, 
-  ApiResponse 
+  ApiResponse,
+  AudioFoldersResponse
 } from '../types'
 
 // Cloudinary configuration
@@ -351,6 +352,18 @@ export const deleteUploadedAudio = async (publicId: string): Promise<{ publicId:
   } catch (error) {
     console.error('Failed to delete uploaded audio:', error)
     toast.error('Failed to delete audio')
+    throw error
+  }
+}
+
+// Get audio folders structure from Cloudinary
+export const getAudioFolders = async (): Promise<AudioFoldersResponse> => {
+  try {
+    const response: AxiosResponse<AudioFoldersResponse> = await api.get('/audio-folders')
+    return response.data
+  } catch (error) {
+    console.error('Failed to fetch audio folders:', error)
+    toast.error('Failed to load audio folders')
     throw error
   }
 }

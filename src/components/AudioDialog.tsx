@@ -10,14 +10,22 @@ import {
   IconButton,
   Input,
   Skeleton,
+  Grid,
+  Card,
+  CardContent,
+  Breadcrumbs,
+  Link,
 } from "@mui/material";
 import {
   Close,
   CloudUpload as CloudUploadIcon,
   PlayArrow as PlayArrowIcon,
   Pause as PauseIcon,
+  Folder as FolderIcon,
+  ArrowBack as ArrowBackIcon,
 } from "@mui/icons-material";
-import { getUploadedAudios, uploadAudioToCloudinary } from "../services/api";
+import { uploadAudioToCloudinary, getAudioFolders } from "../services/api";
+import type { Audio, AudioFolder } from "../types";
 
 interface AudioDialogProps {
   open: boolean;
@@ -25,34 +33,27 @@ interface AudioDialogProps {
   onSelectAudio: (url: string) => void;
 }
 
-interface CloudinaryAudio {
-  public_id: string;
-  secure_url: string;
-  created_at: string;
-}
-
 const AudioDialog: React.FC<AudioDialogProps> = ({
   open,
   onClose,
   onSelectAudio,
 }) => {
-  const [audios, setAudios] = useState<CloudinaryAudio[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [nextCursor, setNextCursor] = useState<string | undefined>();
-  const [hasMore, setHasMore] = useState(false);
+  const [audios, setAudios] = useState<Audio[]>([]);
+  const [folders, setFolders] = useState<AudioFolder[]>([]);
+  const [loadingFolders, setLoadingFolders] = useState(false);
   const [uploadLoading, setUploadLoading] = useState(false);
   const [playingId, setPlayingId] = useState<string | null>(null);
+  const [currentFolderPath, setCurrentFolderPath] = useState<string>("");
+  const [viewMode, setViewMode] = useState<'folders' | 'audios'>('folders');
 
   useEffect(() => {
     if (open) {
-      loadAudios(true);
-    } else {
-      // Reset state when dialog closes
+      loadFolders();
+      // Reset state when dialog opens
       setAudios([]);
-      setNextCursor(undefined);
-      setHasMore(false);
       setPlayingId(null);
+      setCurrentFolderPath("");
+      setViewMode('folders');
     }
   }, [open]);
 
@@ -65,40 +66,46 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
     }
   }, [playingId]);
 
-  const loadAudios = async (reset = false) => {
-    if (reset) {
-      setLoading(true);
-      setAudios([]);
-      setNextCursor(undefined);
-    } else {
-      setLoadingMore(true);
-    }
-
+  const loadFolders = async () => {
+    setLoadingFolders(true);
     try {
-      const result = await getUploadedAudios({
-        limit: 10,
-        nextCursor: reset ? undefined : nextCursor,
-      });
-
-      if (reset) {
-        setAudios(result.audios);
-      } else {
-        setAudios((prev) => [...prev, ...result.audios]);
-      }
-
-      setNextCursor(result.nextCursor);
-      setHasMore(result.hasMore);
+      const result = await getAudioFolders();
+      setFolders(result.folders);
     } catch (error) {
-      console.error("Failed to load audios:", error);
+      console.error("Failed to load folders:", error);
     } finally {
-      setLoading(false);
-      setLoadingMore(false);
+      setLoadingFolders(false);
     }
   };
 
-  const handleAudioSelect = (audioUrl: string) => {
-    onSelectAudio(audioUrl);
-    onClose();
+  const handleFolderClick = (folder: AudioFolder) => {
+    setCurrentFolderPath(folder.path);
+    setViewMode('audios');
+    // Use the audios from the folder data instead of filtering
+    setAudios(folder.audios);
+  };
+
+  const handleBreadcrumbClick = (path: string) => {
+    if (path === "") {
+      // Root level - show folders
+      setViewMode('folders');
+      setCurrentFolderPath("");
+      setAudios([]);
+    } else {
+      // Navigate to specific folder
+      const targetFolder = folders.find(f => f.path === path);
+      if (targetFolder) {
+        setCurrentFolderPath(path);
+        setViewMode('audios');
+        setAudios(targetFolder.audios);
+      }
+    }
+  };
+
+  const handleBackToFolders = () => {
+    setViewMode('folders');
+    setCurrentFolderPath("");
+    setAudios([]);
   };
 
   const handlePlay = (id: string) => {
@@ -122,8 +129,8 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
           "modal-audio-upload"
         ) as HTMLInputElement;
         if (fileInput) fileInput.value = "";
-        // Refresh audios list
-        loadAudios(true);
+        // Refresh folders data
+        loadFolders();
       } catch (error) {
         console.error("Upload failed:", error);
       } finally {
@@ -136,11 +143,27 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
     onClose();
   };
 
+  const handleAudioSelect = (audioUrl: string) => {
+    onSelectAudio(audioUrl);
+    onClose();
+  };
+
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
         <Box display="flex" justifyContent="space-between" alignItems="center">
-          <Typography variant="h6">Select Audio</Typography>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            {viewMode === 'audios' && (
+              <IconButton onClick={handleBackToFolders} size="small">
+                <ArrowBackIcon />
+              </IconButton>
+            )}
+            <Typography variant="h6">
+              {viewMode === 'folders' ? 'Select Audio Folder' :
+               currentFolderPath ? `Audios in ${currentFolderPath.split('/').pop()}` :
+               'Select Audio'}
+            </Typography>
+          </Box>
           <IconButton onClick={handleClose}>
             <Close />
           </IconButton>
@@ -170,18 +193,85 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
           },
         }}
       >
-        {loading ? (
-          <Box>
-            {Array.from({ length: 8 }).map((_, index) => (
-              <Skeleton
-                key={index}
-                variant="rectangular"
-                height={60}
-                sx={{ mb: 1, borderRadius: 1 }}
-              />
-            ))}
+        {/* Breadcrumbs */}
+        {viewMode === 'audios' && currentFolderPath && (
+          <Box sx={{ mb: 2 }}>
+            <Breadcrumbs>
+              <Link
+                component="button"
+                variant="body2"
+                onClick={() => handleBreadcrumbClick("")}
+                sx={{ textDecoration: 'underline', color: 'primary.main' }}
+              >
+                Folders
+              </Link>
+              {currentFolderPath.split('/').filter(segment => segment).map((segment, index, array) => {
+                const path = array.slice(0, index + 1).join('/');
+                return (
+                  <Link
+                    key={path}
+                    component="button"
+                    variant="body2"
+                    onClick={() => handleBreadcrumbClick(path)}
+                    sx={{
+                      textDecoration: index === array.length - 1 ? 'none' : 'underline',
+                      color: index === array.length - 1 ? 'text.primary' : 'primary.main'
+                    }}
+                  >
+                    {segment}
+                  </Link>
+                );
+              })}
+            </Breadcrumbs>
           </Box>
+        )}
+
+        {viewMode === 'folders' ? (
+          // Folder view
+          loadingFolders ? (
+            <Grid container spacing={2}>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <Grid item xs={12} sm={6} md={4} key={index}>
+                  <Skeleton variant="rectangular" height={120} sx={{ borderRadius: 1 }} />
+                </Grid>
+              ))}
+            </Grid>
+          ) : folders.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ textAlign: "center", py: 4 }}>
+              No folders found.
+            </Typography>
+          ) : (
+            <Grid container spacing={2}>
+              {folders.map((folder) => (
+                <Grid item xs={12} sm={6} md={4} key={folder.path}>
+                  <Card
+                    sx={{
+                      cursor: "pointer",
+                      "&:hover": {
+                        boxShadow: 2,
+                        borderColor: "primary.main",
+                      },
+                      border: "1px solid #e0e0e0",
+                      borderRadius: 1,
+                    }}
+                    onClick={() => handleFolderClick(folder)}
+                  >
+                    <CardContent sx={{ textAlign: "center", py: 2 }}>
+                      <FolderIcon sx={{ fontSize: 48, color: "primary.main", mb: 1 }} />
+                      <Typography variant="h6" sx={{ mb: 0.5 }}>
+                        {folder.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {folder.audioCount} audio{folder.audioCount !== 1 ? 's' : ''}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          )
         ) : (
+          // Audio view
           <Box>
             {audios.map((audio) => (
               <Box
@@ -214,7 +304,7 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
                 </IconButton>
                 <Box sx={{ flex: 1 }}>
                   <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {audio.public_id.split('/').pop()}
+                    {audio.name || audio.public_id.split('/').pop()}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     {new Date(audio.created_at).toLocaleDateString()}
@@ -231,18 +321,21 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
           </Box>
         )}
 
-        {audios.length === 0 && !loading && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ textAlign: "center", py: 4 }}
-          >
-            No audios uploaded yet.
-          </Typography>
+        {viewMode === 'audios' && audios.length === 0 && (
+          <Box sx={{ textAlign: "center", py: 4 }}>
+            <Typography variant="body2" color="text.secondary">
+              No audios found in this folder.
+            </Typography>
+            <Button
+              onClick={handleBackToFolders}
+              startIcon={<ArrowBackIcon />}
+              sx={{ mt: 2 }}
+            >
+              Back to Folders
+            </Button>
+          </Box>
         )}
-      </DialogContent>
-
-      <Box
+      </DialogContent>      <Box
         sx={{
           p: 2,
           borderTop: 1,
@@ -250,7 +343,7 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
           display: "flex",
           gap: 2,
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: "flex-start",
         }}
       >
         <Input
@@ -271,17 +364,6 @@ const AudioDialog: React.FC<AudioDialogProps> = ({
         >
           {uploadLoading ? "Uploading..." : "Upload New Audio"}
         </Button>
-
-        {hasMore && (
-          <Button
-            variant="contained"
-            onClick={() => loadAudios(false)}
-            disabled={loadingMore}
-            sx={{ borderRadius: "8px" }}
-          >
-            {loadingMore ? "Loading..." : "Load More Audios"}
-          </Button>
-        )}
       </Box>
     </Dialog>
   );
