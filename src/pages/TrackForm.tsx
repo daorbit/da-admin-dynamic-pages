@@ -15,6 +15,8 @@ import {
   IconButton,
   Checkbox,
   FormControlLabel,
+  FormControl,
+  Select,
 } from "@mui/material";
 import { Image, Audiotrack } from "@mui/icons-material";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -44,7 +46,10 @@ const trackSchema = yup.object({
   category: yup
     .string()
     .optional()
-    .max(50, "Category cannot be more than 50 characters"),
+    .oneOf(
+      ["All", "Trending", "Web development", "AI", "Data Science"],
+      "Invalid category selected"
+    ),
   trending: yup.boolean().optional(),
   audioUrl: yup.string().optional().url("Must be a valid URL"),
   playlistId: yup.string().optional(),
@@ -73,7 +78,7 @@ const TrackForm: React.FC = () => {
     resolver: yupResolver(trackSchema),
     defaultValues: {
       title: "",
-      author: "",
+      author: "The Techodio",
       description: "",
       duration: "",
       listeners: "",
@@ -94,7 +99,7 @@ const TrackForm: React.FC = () => {
         .then((response) => {
           reset({
             title: response.data.title || "",
-            author: response.data.author || "",
+            author: response.data.author || "The Techodio",
             description: response.data.description || "",
             duration: response.data.duration || "",
             listeners: response.data.listeners || "",
@@ -120,9 +125,7 @@ const TrackForm: React.FC = () => {
     const fetchPlaylists = async () => {
       try {
         const response = await playlistsAPI.getAll({ limit: 100 });
-        console.log('Playlists response:', JSON.stringify(response, null, 2));
         setPlaylists(response.data.playlists || (response.data as any).data?.playlists || []);
-        console.log('Playlists set:', response.data.playlists || (response.data as any).data?.playlists || []);
       } catch (err) {
         console.error("Error loading playlists:", err);
       }
@@ -337,17 +340,24 @@ const TrackForm: React.FC = () => {
                 name="category"
                 control={control}
                 render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    error={!!errors.category}
-                    helperText={errors.category?.message}
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
+                  <FormControl fullWidth error={!!errors.category}>
+                    <Select
+                      {...field}
+                      displayEmpty
+                      sx={{
                         borderRadius: "8px",
-                      },
-                    }}
-                  />
+                      }}
+                    >
+                      <MenuItem value="">
+                        <em>Select Category</em>
+                      </MenuItem>
+                      <MenuItem value="All">All</MenuItem>
+                      <MenuItem value="Trending">Trending</MenuItem>
+                      <MenuItem value="Web development">Web development</MenuItem>
+                      <MenuItem value="AI">AI</MenuItem>
+                      <MenuItem value="Data Science">Data Science</MenuItem>
+                    </Select>
+                  </FormControl>
                 )}
               />
             </Grid>
