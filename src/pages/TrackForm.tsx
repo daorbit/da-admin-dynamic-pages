@@ -13,8 +13,6 @@ import {
   Grid,
   MenuItem,
   IconButton,
-  Checkbox,
-  FormControlLabel,
   FormControl,
   Select,
 } from "@mui/material";
@@ -47,7 +45,7 @@ const trackSchema = yup.object({
     .string()
     .optional()
     .oneOf(
-      ["All", "Trending", "Web development", "AI", "Data Science"],
+      ["", "All", "Trending", "Web development", "AI", "Data Science"],
       "Invalid category selected"
     ),
   trending: yup.boolean().optional(),
@@ -349,7 +347,7 @@ const TrackForm: React.FC = () => {
                       }}
                     >
                       <MenuItem value="">
-                        <em>Select Category</em>
+                        None
                       </MenuItem>
                       <MenuItem value="All">All</MenuItem>
                       <MenuItem value="Trending">Trending</MenuItem>
@@ -362,34 +360,7 @@ const TrackForm: React.FC = () => {
               />
             </Grid>
 
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="trending"
-                control={control}
-                render={({ field }) => (
-                  <FormControlLabel
-                    control={
-                      <Checkbox
-                        {...field}
-                        checked={field.value || false}
-                        sx={{
-                          '&.Mui-checked': {
-                            color: '#1976d2',
-                          },
-                        }}
-                      />
-                    }
-                    label="Trending"
-                    sx={{
-                      '& .MuiFormControlLabel-label': {
-                        fontSize: '14px',
-                      },
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-
+         
             <Grid item xs={12}>
               <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Thumbnail
@@ -518,6 +489,7 @@ const TrackForm: React.FC = () => {
               type="submit"
               variant="contained"
               disabled={loading}
+              startIcon={loading ? <CircularProgress size={16} style={{ color: "#fff" }} /> : undefined}
               sx={{
                 borderRadius: "8px",
                 textTransform: "none",
@@ -525,14 +497,6 @@ const TrackForm: React.FC = () => {
                 px: 3,
               }}
             >
-              {loading ? (
-                <CircularProgress
-                  size={16}
-                  style={{ color: "#fff", marginRight: "8px" }}
-                />
-              ) : (
-                ""
-              )}
               {loading
                 ? "Saving..."
                 : isEditing
