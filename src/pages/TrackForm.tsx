@@ -65,6 +65,7 @@ const TrackForm: React.FC = () => {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [audioDialogOpen, setAudioDialogOpen] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   const {
     control,
@@ -72,6 +73,7 @@ const TrackForm: React.FC = () => {
     formState: { errors },
     reset,
     setValue,
+    watch,
   } = useForm<CreateTrackData>({
     resolver: yupResolver(trackSchema),
     defaultValues: {
@@ -106,7 +108,7 @@ const TrackForm: React.FC = () => {
             category: response.data.category || "",
             trending: response.data.trending || false,
             audioUrl: response.data.audioUrl || "",
-            playlistId: response.data.playlists?.[0] || "",
+            playlistId: (response.data.playlists?.[0] as any)?._id || "",
           });
         })
         .catch((err) => {
@@ -161,6 +163,60 @@ const TrackForm: React.FC = () => {
 
   const handleAudioSelect = (audioUrl: string) => {
     setValue('audioUrl', audioUrl);
+  };
+
+  const generateDescription = async () => {
+    const title = watch("title");
+    if (!title) {
+      setError("Title is required to generate description");
+      return;
+    }
+
+    setGeneratingDesc(true);
+    try {
+      const apiKey = (import.meta as any).env.VITE_GEMINI_API_KEY;
+      if (!apiKey) {
+        throw new Error("Gemini API key not configured");
+      }
+
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Generate a compelling and concise description for a track with the following title. The description should be engaging, highlight key themes or features, and be suitable for an audio track. Keep it under 500 characters.
+
+Title: "${title}"
+
+Make it sound professional and appealing.`,
+                  },
+                ],
+              },
+            ],
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to generate description");
+      }
+
+      const data = await response.json();
+      const generatedDesc = data.candidates[0].content.parts[0].text.trim();
+      setValue("description", generatedDesc);
+    } catch (err) {
+      console.error("Error generating description:", err);
+      setError(err instanceof Error ? err.message : "Failed to generate description");
+    } finally {
+      setGeneratingDesc(false);
+    }
   };
 
   if (loadingTrack) {
@@ -236,25 +292,42 @@ const TrackForm: React.FC = () => {
               <Typography variant="body1" sx={{ mb: 1, fontSize: "13px" }}>
                 Description
               </Typography>
-              <Controller
-                name="description"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    multiline
-                    rows={3}
-                    error={!!errors.description}
-                    helperText={errors.description?.message}
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                <Controller
+                  name="description"
+                  control={control}
+                  render={({ field }) => (
+                    <TextField
+                      {...field}
+                      fullWidth
+                      multiline
+                      rows={3}
+                      error={!!errors.description}
+                      helperText={errors.description?.message}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: "8px",
+                        },
+                      }}
+                    />
+                  )}
+                />
+                <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button
+                    variant="outlined"
+                    onClick={generateDescription}
+                    disabled={generatingDesc || !watch("title")}
+                    size="small"
                     sx={{
-                      "& .MuiOutlinedInput-root": {
-                        borderRadius: "8px",
-                      },
+                      borderRadius: "8px",
+                      textTransform: "none",
+                      fontWeight: 500,
                     }}
-                  />
-                )}
-              />
+                  >
+                    {generatingDesc ? "Generating..." : "Generate with AI"}
+                  </Button>
+                </Box>
+              </Box>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -489,7 +562,6 @@ const TrackForm: React.FC = () => {
               type="submit"
               variant="contained"
               disabled={loading}
-              startIcon={loading ? <CircularProgress size={16} style={{ color: "#fff" }} /> : undefined}
               sx={{
                 borderRadius: "8px",
                 textTransform: "none",
